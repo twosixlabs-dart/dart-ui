@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %l lowers performance -->
+            <!--<pattern>%d [%t] %-5p %l%n %m%n</pattern> -->
+            <pattern>%d - %logger - [%t] %-5p %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache.zookeeper" level="WARN"/>
+
+    <logger name="kafka.server" level="WARN"/>
+    <logger name="kafka.zookeeper" level="WARN"/>
+    <logger name="kafka.log" level="WARN"/>
+    <logger name="kafka.cluster" level="WARN"/>
+    <logger name="kafka.coordinator" level="WARN"/>
+    <logger name="kafka.controller" level="WARN"/>
+    <logger name="kafka.common" level="ERROR"/>
+    <logger name="kafka.zk" level="WARN"/>
+    <logger name="kafka.network" level="WARN"/>
+
+    <logger name="org.apache.zookeeper" level="ERROR"/>
+    <logger name="org.apache.kafka.clients" level="ERROR"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.apache.kafka.common.utils" level="OFF"/>
+    <logger name="org.apache.kafka.clients.producer" level="OFF"/>
+    <logger name="state.change.logger" level="OFF"/>
+    <logger name="com.yammer.metrics.reporting" level="OFF"/>
+
+    <logger name="com.mchange.v2.log" level="OFF"/>
+    <logger name="com.mchange.v2.c3p0.impl" level="WARN"/>
+
+    <logger name="com.twosixlabs.dart.pipeline" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.stage" level="INFO"/>
+
+    <logger name="com.twosixlabs.cdr4s.json.dart" level="ERROR"/>
+    <logger name="com.twosixlabs.dart.serialization.json" level="ERROR"/>
+
+    <logger name="com.twosixlabs.dart.ontologies.dao" level="WARN"/>
+
+    <!-- set to INFO if you want to see exceptions from the operational db -->
+    <logger name="com.twosixlabs.dart.operations.status.client" level="INFO"/>
+    <logger name="com.twosixlabs.dart.operations.status" level="INFO"/>
+
+    <logger name="com.twosixlabs.dart.datastore" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.processor" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.stage.DartPipelineStage" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.stage.AnnotatorStageManager" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.stage.IngestionStage" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.stage.CoreProcessingStage" level="INFO"/>
+    <logger name="com.twosixlabs.dart.pipeline.DART" level="INFO"/>
+
+    <logger name="com.twosixlabs.dart.service.ElasticsearchIndex" level="INFO"/>
+
+    <logger name="Main" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="consoleAppender"/>
+    </root>
+
+</configuration>

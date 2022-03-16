@@ -1,0 +1,40 @@
+# osx artifacts
+.DS_Store
+
+# Java artifacts
+*.class
+*.log
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+project/target
+project/project
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+*.iml
+.idea/*
+.idea
+.bsp
+
+node_modules
+
+.scala-js-sources
+package-lock.json
+
+data
+
+public
+
+dist
+*.tgz

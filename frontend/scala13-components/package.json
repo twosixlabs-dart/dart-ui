@@ -1,0 +1,30 @@
+{
+  "name": "dart-ui-scala13-components",
+  "version": "1.0.0",
+  "description": "Scala.js components in scala 2.13 used in DART-UI",
+  "main": "target/scala-2.13/scala13components-opt/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist && rm -rf dart-ui-scala13-components-*.tgz",
+    "init": "mkdir dist",
+    "pre-build": "npm run clean && npm run init",
+    "build": "npx babel src -d dist --presets=@babel/preset-env,@babel/preset-react --plugins=@babel/plugin-proposal-class-properties,syntax-dynamic-import --source-maps",
+    "package": "npm run pre-build && npm run build && npm pack"
+  },
+  "author": "John Hungerford",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-beautiful-dnd": "13.0.0",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.10.4",
+    "@babel/register": "^7.12.0",
+    "babel-eslint": "^10.1.0"
+  }
+}

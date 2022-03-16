@@ -1,0 +1,29 @@
+            {componentMap.map((componentId) => {
+              const aggresultsKeys = Object.keys(aggregations)
+                .filter((key) => key.startsWith(componentId));
+              const aggResults = {};
+              aggresultsKeys.forEach((key) => {
+                aggResults[key.replace(`${componentId}-`, '')] = aggregations[key];
+              });
+              return (
+                <div
+                  className={classes.componentEle}
+                  key={componentId}
+                  data-grid={componentIndex[componentId].layout}
+                >
+                  <Paper classes={{ root: classes.componentPaper }}>
+                    <CorpusViewerComponent
+                      aggResults={aggResults}
+                      componentIndex={componentIndex}
+                      addComponent={this.addComponent(componentId)}
+                      removeComponent={this.removeComponent(componentId)}
+                      updateData={this.updateDataGen(componentId)}
+                      updateState={this.updateStateGen(componentId)}
+                      outerWidth={outerWidth - 40}
+                      id={componentId}
+                      key={`corpus-viewer-component-${componentId}`}
+                    />
+                  </Paper>
+                </div>
+              );
+            })}
