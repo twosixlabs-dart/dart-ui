@@ -180,7 +180,6 @@ lazy val server = ( project in file( "backend/server" ) )
 		  "com.arangodb" %% "velocypack-module-scala" % "1.2.0",
 		  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.10.5",
 		  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5",
-		  "com.twosixlabs.dart" %% "dart-arangodb-datastore" % "3.0.24",
 	  ),
 	  assemblySettings,
   )
@@ -426,10 +425,10 @@ compileApp := ( DevConfig / compileApp ).value
 val compileConf = taskKey[ Unit ]( "Compile js config file" )
 
 ProdConfig / compileConf := {
-	s"npx webpack --mode production --config frontend/config-js/webpack.config.js" !
+	s"scripts/inject-config.sh" !
 }
 DevConfig / compileConf := {
-	s"npx webpack --mode development --config frontend/config-js/webpack.config.js" !
+	s"scripts/inject-config.sh" !
 }
 
 // Build Application

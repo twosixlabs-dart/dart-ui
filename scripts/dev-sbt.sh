@@ -6,6 +6,8 @@
 
 . scripts/set-dev-env.sh
 
+env
+
 docker-compose up -d
 
 sbt

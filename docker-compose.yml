@@ -1,0 +1,204 @@
+# This docker-compose network is configured to match the configuration used in
+# scripts/dev-sbt.sh and scripts/js-dev-server.sh to launch development environments.
+
+version: "2.2"
+services:
+
+  # Use this to run concepts-ui from sbt within the network
+  #  dart-ui-runner:
+  #    networks:
+  #      - concepts_network
+  #    hostname: dart-ui-runner
+  #    container_name: dart-ui-runner
+  #    image: twosixlabsdart/java-fatjar-runner:latest
+  #    ports:
+  #      - "80:8080"
+  #    entrypoint: ["tail","-f"]
+  #    working_dir: /opt/app
+  #    volumes:
+  #      - ./:/opt/app
+  #      - ~/.sbt:/root/.sbt
+  #      - ~/.ivy2:/root/.ivy2
+  #    environment:
+  #      - SBT_OPTS=-Xmx4G -Xss2M
+  #      - CLUSTERING_TEST_MODE=false
+  #      - CLUSTERING_HOST=concepts-api-runner
+  #      - CLUSTERING_PORT=8080
+  #      - DART_AUTH_BYPASS=true
+  #      - ARANGODB_HOST=localhost
+  #      - KAFKA_BOOTSTRAP_SERVERS=kafka-broker-1:19092
+  #      - POSTGRES_HOST=postgres
+  #      - POSTGRES_PORT=5432
+  #      - POSTGRES_USER=dart
+  #      - POSTGRES_PASSWORD=dart_pass
+  #      - POSTGRES_DATABASE=dart_db
+
+  # Use this to run dart-ui from a docker build
+  #  dart-ui:
+  #    networks:
+  #      - dart_ui_network
+  #    hostname: dart-ui
+  #    container_name: dart-ui
+  #    ports:
+  #      - "80:8080"
+  #    image: twosixlabsdart/dart-ui:latest
+  #    environment:
+  #      - CLUSTERING_TEST_MODE=false
+  #      - CLUSTERING_HOST=concepts-api
+  #      - CLUSTERING_PORT=8080
+  #      - DART_AUTH_BYPASS=true
+  #      - ARANGODB_HOST=dart-arangodb
+  #      - KAFKA_BOOTSTRAP_SERVERS=kafka-broker-1:19092
+  #      - POSTGRES_HOST=dart-postgres
+  #      - POSTGRES_PORT=5432
+  #      - POSTGRES_USER=dart
+  #      - POSTGRES_PASSWORD=dart_pass
+  #      - POSTGRES_DATABASE=dart_db
+  #      - PROCUREMENT_URL=http://localhost:8092
+  #      - SEARCH_URL=http://localhost:8088
+
+  corpex:
+    networks:
+      - dart_ui_network
+    hostname: corpex
+    container_name: corpex
+    ports:
+      - "8088:8088"
+    image: twosixlabsdart/corpex:latest
+    environment:
+      - PROGRAM_ARGS=--env default
+      - DART_AUTH_BYPASS=true
+      - ELASTICSEARCH_HOST=cdr-es
+      - CORS_ALLOWED_ORIGINS=http://localhost:8080,http://localhost:80,http://localhost
+
+  forklift:
+    networks:
+      - dart_ui_network
+    restart: always
+    hostname: forklift
+    container_name: forklift
+    ports:
+      - "8092:8091"
+    image: twosixlabsdart/forklift:latest
+    environment:
+      - PROGRAM_ARGS=--env docker
+      - CORS_ALLOWED_ORIGINS=http://localhost:8080,http://localhost:80,http://localhost
+      - DART_AUTH_BYPASS=true
+      - DART_NUM_ANNOTATORS=3
+
+  cdr-es:
+    environment:
+      - discovery.type=single-node
+    networks:
+      - dart_ui_network
+    restart: always
+    hostname: cdr-es
+    container_name: cdr-es
+    ports:
+      - "9200:9200"
+    image: twosixlabsdart/dart-es:latest
+
+  dart-postgres:
+    container_name: dart-postgres
+    hostname: dart-postgres
+    ports:
+      - "5432:5432"
+    image: twosixlabsdart/dart-postgres:latest
+    restart: unless-stopped
+    environment:
+      DART_USER: dart
+      DART_PASSWORD: dart_pass
+      DART_DB: dart_db
+    networks:
+      - dart_ui_network
+
+  concepts-api:
+    networks:
+      - dart_ui_network
+    restart: always
+    hostname: concepts-api
+    container_name: concepts-api
+    ports:
+      - "8091:8080"
+    image: twosixlabsdart/concepts-api:latest
+    environment:
+      - DART_AUTH_BYPASS=true
+      - DISCOVERY_ENABLED=false
+      - CLUSTERING_SERVER_ENABLED=true
+      - CLUSTERING_HOST=http://afrl402.bbn.com
+      - CLUSTERING_PORT=5061
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=dart
+      - POSTGRES_PASSWORD=dart_pass
+      - POSTGRES_DATABASE=dart_db
+
+  kafka-broker-1:
+    image: twosixlabsdart/confluent-kafka:latest
+    restart: unless-stopped
+    hostname: kafka-broker-1
+    ports:
+      - 9092:9092
+      - 19092:19092
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_LOCALHOST://localhost:9092,LISTENER_INTERNAL_DOCKER://kafka-broker-1:19092
+      KAFKA_BROKER_ID: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL_DOCKER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_LOCALHOST:PLAINTEXT,LISTENER_INTERNAL_DOCKER:PLAINTEXT
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 15000000
+      KAFKA_MESSAGE_MAX_BYTES: 15000000
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 110000000
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 0
+    volumes:
+      - ./data/kafka-broker-1:/var/lib/kafka/data
+    networks:
+      - dart_ui_network
+
+  zookeeper-1:
+    image: zookeeper:3.4.9
+    restart: unless-stopped
+    container_name: zookeeper-1
+    hostname: zookeeper-1
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888
+    volumes:
+      - ./data/zookeeper-1/data:/data
+      - ./data/zookeeper-1/datalog:/datalog
+    networks:
+      - dart_ui_network
+
+  topic-provisioner:
+    image: twosixlabsdart/topic-provisioner:latest
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka-broker-1:19092
+    healthcheck:
+      test: [ "CMD", "cat", "/opt/app/interstellar/.success" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - kafka-broker-1
+    networks:
+      - dart_ui_network
+
+  # DART ArangoDB
+  dart-arangodb:
+    container_name: dart-arangodb
+    hostname: dart-arangodb
+    image: twosixlabsdart/dart-arangodb:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/arangodb/data:/opt/arangodb/data
+    ports:
+      - 8529:8529
+    networks:
+      - dart_ui_network
+
+networks:
+  dart_ui_network:
