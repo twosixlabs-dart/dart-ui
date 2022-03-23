@@ -385,6 +385,7 @@ lazy val app = ( project in file( "frontend/app" ) )
 	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
 //	  useYarn := true,
 	  webpack / version := "4.28.4",
+	  npmExtraArgs := Seq( "--legacy-peer-deps" ),
 	  webpackConfigFile := Some( baseDirectory.value / "app.config.js" ),
 	  webpackConfigFile in Test := Some( baseDirectory.value / "app.config.test.js" ),
   )
