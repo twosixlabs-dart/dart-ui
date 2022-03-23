@@ -17,7 +17,7 @@ docker-login:
 
 docker-build:
 	SBT_OPTS="-Xmx4G -Xss2M" sbt clean dev:assembleApp
-    docker build -t $(IMG):$(APP_VERSION) .
+	docker build -t $(IMG):$(APP_VERSION) .
 
 docker-push: docker-login docker-build
 	docker push $(IMG):$(APP_VERSION)

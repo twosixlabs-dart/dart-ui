@@ -9,7 +9,7 @@ ENV BACKEND_PUBLIC_DIR $APP_DIR/public
 
 EXPOSE 8080
 
-RUN yum install nodejs -y
+RUN apt update -y && apt install -y nodejs npm
 ADD ./frontend/config-js $APP_DIR/config-js
 COPY ./frontend/config-js/package.json $APP_DIR
 COPY ./public $BACKEND_PUBLIC_DIR
@@ -25,4 +25,4 @@ WORKDIR $APP_DIR
 RUN rm -rf public/js/config.js || :
 RUN chmod -R 755 /opt/app
 
-ENTRYPOINT ["/opt/app/run-jar.sh"]
+ENTRYPOINT ["/opt/app/start-app.sh"]

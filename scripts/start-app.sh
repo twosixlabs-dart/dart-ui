@@ -5,4 +5,4 @@
 
 cd $APP_DIR/config-js
 npx webpack
-$APP_DIR/run.sh
+$APP_DIR/run-jar.sh
