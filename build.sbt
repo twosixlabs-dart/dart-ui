@@ -36,7 +36,6 @@ lazy val commonSettings = {
 			  "Sonatype snapshots" at "https://s01.oss.sonatype" +
                 ".org/content/repositories/snapshots/",
 			  "JCenter" at "https://jcenter.bintray.com",
-			  "Cause Ex Repository" at "https://nexus.causeex.com/repository/proxymaven/",
 			  "Local Ivy Repository" at s"file://${
 				  System
 					.getProperty( "user.home" )
