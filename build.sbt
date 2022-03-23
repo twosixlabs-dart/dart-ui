@@ -312,6 +312,7 @@ lazy val scala13Components = ( project in file( "frontend/scala13-components" ) 
 		++ scalaJsReact.value
 		++ scalaJsReactBeautifulDnd.value,
 	  scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+	  npmExtraArgs := Seq( "--legacy-peer-deps" ),
 	  disablePublish,
   )
 
