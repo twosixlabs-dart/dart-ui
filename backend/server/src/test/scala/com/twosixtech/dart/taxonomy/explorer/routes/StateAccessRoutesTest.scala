@@ -40,7 +40,8 @@ class StateAccessRoutesTest
     val authDeps : SecureDartController.Dependencies = new SecureDartController.Dependencies {
         override val serviceName : String = "state-access"
         override val secretKey : Option[ String ] = None
-        override val bypassAuth : Boolean = true
+        override val useDartAuth : Boolean = false
+        override val basicAuthCredentials : Seq[ (String, String) ] = Nil
     }
 
     override val userDataStore : VersionedUserDataStore[ DartUser, StateAccessApi.ConceptsState ] =
@@ -222,6 +223,6 @@ class StateAccessRoutesTest
     }
     override val authDependencies : SecureDartController.Dependencies = SecureDartController.deps(
         "cluster",
-        SecureDartController.authDeps( None, bypassAuthIn = true )
+        SecureDartController.authDeps( None, useDartAuthIn = false, basicAuthCredsIn = Nil )
     )
 }

@@ -28,7 +28,7 @@ class ClusterRoutesDITest
     with UUIDTaxonomyIdSerializationDI
     with WmDartClusterConceptBridgeDI {
     override val authDependencies : SecureDartController.Dependencies =
-        SecureDartController.deps( "test-name", None, true )
+        SecureDartController.deps( "test-name", None, false, Nil )
 
     behavior of "ClusterRoutes.StringPathMatcher"
 
