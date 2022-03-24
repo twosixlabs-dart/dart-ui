@@ -25,6 +25,20 @@ class CorpexUi extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const prevTenants = prevProps.tenants;
+    // eslint-disable-next-line react/destructuring-assignment
+    const newTenants = this.props.tenants;
+    const { dispatch, tenantId } = this.props;
+
+    if (tenantId !== null
+      && tenantId !== undefined
+      && newTenants.length !== prevTenants.length
+      && newTenants.length > 0) {
+      dispatch(chooseTenant(newTenants[0]));
+    }
+  }
+
   render() {
     const {
       docView,

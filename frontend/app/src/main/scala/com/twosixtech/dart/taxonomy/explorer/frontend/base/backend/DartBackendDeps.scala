@@ -2,12 +2,12 @@ package com.twosixtech.dart.taxonomy.explorer.frontend.base.backend
 
 import com.twosixlabs.dart.auth.groups.ProgramManager
 import com.twosixlabs.dart.auth.user.DartUser
-import com.twosixtech.dart.scalajs.backend.{BackendClient, BackendComponent, BackendContext}
+import com.twosixtech.dart.scalajs.backend.{ BackendClient, BackendComponent, BackendContext }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.error.ErrorHandlerDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.configuration.DartConfigDeps
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
 
 import scala.scalajs.js
 
@@ -35,7 +35,7 @@ trait DartBackendDeps {
             new BackendComponent[ Cx, St ] {
                 override type BackendType = Unit
 
-                val component = ScalaComponent.builder[ Cx => VdomElement ]
+                val component = ScalaComponent.builder[ Cx => VdomNode ]
                   .initialState( emptyState )
                   .render_P( renderer => {
                       renderer( genContext( client, Some( DartUser( "program-manager", Set( ProgramManager ) ) ) ) )
@@ -43,8 +43,8 @@ trait DartBackendDeps {
                   .build
 
                 override def apply(
-                    renderer : Cx => VdomElement
-                ) : Unmounted[ Cx => VdomElement, St, Unit ] = component( renderer )
+                    renderer : Cx => VdomNode
+                ) : Unmounted[ Cx => VdomNode, St, Unit ] = component( renderer )
             }
         }
 

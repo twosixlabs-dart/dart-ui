@@ -23,6 +23,7 @@ module.exports = {
       DART_LOG_MAX_LENGTH: null,
       DART_AUTH_BYPASS: null,
       DART_BASE_PATH: null,
+      TENANTS_URL: null,
       PROCUREMENT_URL: null,
       SEARCH_URL: null,
       RAW_DOC_URL: null,

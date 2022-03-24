@@ -1,7 +1,8 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator
 
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.context.NoOpDartTenantsContextDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.dart.component.test.DartComponentTestStateConfiguration
-import com.twosixtech.dart.taxonomy.explorer.models.{Cluster, NodeSimilarity}
+import com.twosixtech.dart.taxonomy.explorer.models.{ Cluster, NodeSimilarity }
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom.raw.HTMLElement
@@ -11,7 +12,8 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 trait DartClusterCuratorClusterTestStateConfig
-  extends DartComponentTestStateConfiguration {
+  extends DartComponentTestStateConfiguration
+    with NoOpDartTenantsContextDI {
 
     override def defaultRenderer( implicit context : DartContext ) : VdomElement = {
 

@@ -20,6 +20,7 @@ trait DartConfig extends js.Object {
     val keycloakInit : KeycloakInit = js.native
     val disableAuth : Boolean = js.native
     val basePath : String = js.native
+    val tenantsBaseUrl : String = js.native
 }
 
 trait DartConfigDeps {

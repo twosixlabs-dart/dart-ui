@@ -108,7 +108,7 @@ trait KeycloakXhrDartBackendDI
         override def enabledContextComponent : BackendComponent[ KeycloakContext, State ] = new BackendComponent[ KeycloakContext, State ] {
             override type BackendType = Backend
 
-            class Backend( scope : BackendScope[ KeycloakContext => VdomElement, State ] ) {
+            class Backend( scope : BackendScope[ KeycloakContext => VdomNode, State ] ) {
 
                 private val keycloak = new Keycloak( dartConfig.keycloakParams )
 
@@ -176,7 +176,7 @@ trait KeycloakXhrDartBackendDI
                       }
                 }
 
-                def render( renderer : KeycloakContext => VdomElement, state : State ) : VdomNode = {
+                def render( renderer : KeycloakContext => VdomNode, state : State ) : VdomNode = {
                     val updateTokenCallback : CallbackTo[ Future[ (String, DartUser, Int) ] ] = CallbackTo {
                         keycloak.updateToken( 30 )
                           .toFuture
@@ -215,13 +215,13 @@ trait KeycloakXhrDartBackendDI
                 }
             }
 
-            val component = ScalaComponent.builder[ KeycloakContext => VdomElement ]
+            val component = ScalaComponent.builder[ KeycloakContext => VdomNode ]
               .initialState( State() )
               .backend( new Backend( _ ) )
               .renderBackend
               .build
 
-            override def apply( renderer : KeycloakContext => VdomElement ) : Unmounted[ KeycloakContext => VdomElement, State, Backend ] =
+            override def apply( renderer : KeycloakContext => VdomNode ) : Unmounted[ KeycloakContext => VdomNode, State, Backend ] =
                 component( renderer )
         }
     }

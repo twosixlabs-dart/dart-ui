@@ -12,6 +12,7 @@ export default {
   keycloakParams: '/keycloak.json',
   disableAuth: envBool(process.env.DART_AUTH_BYPASS, false),
   basePath: envStr(process.env.DART_BASE_PATH, '/concepts/explorer'),
+  tenantsBaseUrl : envStr(process.env.TENANTS_URL, '') + '/dart/api/v1/tenants',
   common: {
     STORAGE_SUBSCRIPTION_THROTTLE_INTERVAL: 5000,
     DART_API_URL_BASE: `${process.env.PROCUREMENT_URL}/dart/api/v1`,

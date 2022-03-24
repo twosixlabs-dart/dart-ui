@@ -1,5 +1,6 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.state.access
 
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.context.NoOpDartTenantsContextDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.dart.component.test.DartComponentTestStateConfiguration
 import japgolly.scalajs.react.vdom.VdomElement
 import org.scalajs.dom.raw.HTMLElement
@@ -9,7 +10,8 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait StateAccessComponentTestConfig
-  extends DartComponentTestStateConfiguration {
+  extends DartComponentTestStateConfiguration
+    with NoOpDartTenantsContextDI {
 
     val testRenderContext : StateAccessComponentRenderContext
 

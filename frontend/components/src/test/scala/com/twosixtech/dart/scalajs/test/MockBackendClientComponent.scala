@@ -19,7 +19,7 @@ class MockBackendClientComponent extends ReactComponent[ Props, State ] {
 
         val id : String = UUID.randomUUID().toString
 
-        def render( props : Props, state : State ): VdomElement = {
+        def render( props : Props, state : State ): VdomNode = {
             props.render(
                 new MockBackendContext(
                     id,
@@ -43,12 +43,12 @@ class MockBackendClientComponent extends ReactComponent[ Props, State ] {
         props : Props
     ) : Unmounted[ Props, State, Backend ] = component( props )
 
-    def apply( render : MockBackendContext => VdomElement ) : Unmounted[ Props, State, Backend ] = apply( Props( render ) )
+    def apply( render : MockBackendContext => VdomNode ) : Unmounted[ Props, State, Backend ] = apply( Props( render ) )
 }
 
 object MockBackendClientComponent {
     case class Props(
-        render : MockBackendContext => VdomElement,
+        render : MockBackendContext => VdomNode,
     )
 
     case class State(

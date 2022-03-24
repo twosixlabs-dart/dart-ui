@@ -2,14 +2,14 @@ package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.ba
 
 import com.twosixlabs.dart.auth.groups.ProgramManager
 import com.twosixlabs.dart.auth.user.DartUser
-import com.twosixtech.dart.scalajs.backend.{BackendClient, BackendComponent, XhrBackendClient}
-import com.twosixtech.dart.scalajs.test.{BackendMocks, MockBackendClientComponent, RequestMocker, TestBackendClient}
+import com.twosixtech.dart.scalajs.backend.{ BackendClient, BackendComponent, XhrBackendClient }
+import com.twosixtech.dart.scalajs.test.{ BackendMocks, MockBackendClientComponent, RequestMocker, TestBackendClient }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.error.ErrorHandlerDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.configuration.DartTestConfigDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.backend.DartBackendDeps
-import japgolly.scalajs.react.{Callback, ScalaComponent}
+import japgolly.scalajs.react.{ Callback, ScalaComponent }
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
 
 import java.util.UUID
 
@@ -46,7 +46,7 @@ trait MockedBackendDI extends DartBackendDeps {
             new BackendComponent[ TestBackendContext, Unit ] {
                 override type BackendType = Unit
 
-                val component = ScalaComponent.builder[ TestBackendContext => VdomElement ]
+                val component = ScalaComponent.builder[ TestBackendContext => VdomNode ]
                   .initialState()
                   .render_P( renderer => {
                       mockBackendClientComponent { mockClientContext =>
@@ -63,8 +63,8 @@ trait MockedBackendDI extends DartBackendDeps {
                   .build
 
                 override def apply(
-                    props : TestBackendContext => VdomElement,
-                ) : Unmounted[ TestBackendContext => VdomElement, Unit, Unit ] = component( props )
+                    props : TestBackendContext => VdomNode,
+                ) : Unmounted[ TestBackendContext => VdomNode, Unit, Unit ] = component( props )
             }
     }
 

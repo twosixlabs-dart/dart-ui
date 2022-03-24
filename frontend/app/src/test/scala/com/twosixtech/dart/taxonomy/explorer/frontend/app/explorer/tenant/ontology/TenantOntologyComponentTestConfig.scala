@@ -1,5 +1,6 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.tenant.ontology
 
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.context.NoOpDartTenantsContextDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.dart.component.test.DartComponentTestStateConfiguration
 import japgolly.scalajs.react.vdom.VdomElement
 import org.scalajs.dom.raw.HTMLElement
@@ -10,7 +11,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 trait TenantOntologyComponentTestConfig
-  extends DartComponentTestStateConfiguration {
+  extends DartComponentTestStateConfiguration
+    with NoOpDartTenantsContextDI {
 
     val testRenderContext : TenantOntologyComponentRenderContext
 
