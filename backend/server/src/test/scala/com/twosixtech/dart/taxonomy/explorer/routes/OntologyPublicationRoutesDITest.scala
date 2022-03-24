@@ -30,7 +30,7 @@ class OntologyPublicationRoutesDITest
     with UUIDTaxonomyIdSerializationDI {
 
     override lazy val authDependencies : SecureDartController.Dependencies = {
-        val authdeps = SecureDartController.authDeps( None, true )
+        val authdeps = SecureDartController.authDeps( None, false )
         SecureDartController.deps( "test", authdeps )
     }
 
