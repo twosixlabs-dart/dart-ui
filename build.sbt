@@ -36,7 +36,6 @@ lazy val commonSettings = {
 			  "Sonatype snapshots" at "https://s01.oss.sonatype" +
                 ".org/content/repositories/snapshots/",
 			  "JCenter" at "https://jcenter.bintray.com",
-			  "Cause Ex Repository" at "https://nexus.causeex.com/repository/proxymaven/",
 			  "Local Ivy Repository" at s"file://${
 				  System
 					.getProperty( "user.home" )
@@ -67,19 +66,8 @@ lazy val commonSettings = {
 	  )
 }
 
-lazy val publishSettings = Seq(
-	publishTo := {
-		if ( isSnapshot
-		  .value ) Some( "Cause Ex Nexus Repository Snapshots" at "https://nexus.causeex" +
-          ".com/repository/maven" )
-		else Some( "Cause Ex Nexus Repository Releases" at "https://nexus.causeex" +
-          ".com/repository/maven/" )
-	},
-	publishMavenStyle := true,
-)
-
 lazy val disablePublish = Seq(
-	publish := {}
+	skip.in( publish ) := true,
 )
 
 lazy val assemblySettings = Seq(
@@ -92,6 +80,24 @@ lazy val assemblySettings = Seq(
 	test in assembly := {},
 	mainClass in(Compile, packageBin) := Some( "Main" ),
 )
+
+sonatypeProfileName := "com.twosixlabs"
+inThisBuild(List(
+	organization := "com.twosixlabs.dart.ui",
+	homepage := Some(url("https://github.com/twosixlabs-dart/dart-ui")),
+	licenses := List("GNU-Affero-3.0" -> url("https://www.gnu.org/licenses/agpl-3.0.en.html")),
+	developers := List(
+		Developer(
+			"twosixlabs-dart",
+			"Two Six Technologies",
+			"",
+			url("https://github.com/twosixlabs-dart")
+		)
+	)
+))
+
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 
 /*
@@ -119,7 +125,6 @@ lazy val common = ( project in file( "common" ) )
 	  commonSettings,
 	  testFrameworks += new TestFramework( "utest.runner.Framework" ),
 	  libraryDependencies ++= uPickle.value ++ uTest.value ++ scalaTest.value,
-	  publishSettings,
   )
 
 lazy val backend = ( project in file( "backend" ) )
@@ -136,7 +141,6 @@ lazy val api = ( project in file( "backend/api" ) )
   .settings(
 	  commonSettings,
 	  libraryDependencies ++= logging ++ uPickle.value ++ scalaTest.value,
-	  publishSettings,
   )
 
 lazy val services = ( project in file( "backend/services" ) )
@@ -180,7 +184,6 @@ lazy val server = ( project in file( "backend/server" ) )
 		  "com.arangodb" %% "velocypack-module-scala" % "1.2.0",
 		  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.10.5",
 		  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5",
-		  "com.twosixlabs.dart" %% "dart-arangodb-datastore" % "3.0.24",
 	  ),
 	  assemblySettings,
   )
@@ -204,7 +207,6 @@ lazy val utilities = ( project in file( "backend/utilities" ) )
 		  "com.arangodb" %% "velocypack-module-scala" % "1.2.0",
 		  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.10.5",
 		  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5",
-		  "com.twosixlabs.dart" %% "dart-arangodb-datastore" % "3.0.24",
 	  ),
 	  assemblySettings,
   )
@@ -286,7 +288,6 @@ lazy val scala13Components = ( project in file( "frontend/scala13-components" ) 
 					"Sonatype snapshots" at "https://s01.oss.sonatype" +
                       ".org/content/repositories/snapshots/",
 					"JCenter" at "https://jcenter.bintray.com",
-					"Cause Ex Repository" at "https://nexus.causeex.com/repository/proxymaven/",
 					"Local Ivy Repository" at s"file://${
 						System
 						  .getProperty( "user.home" )
@@ -388,6 +389,7 @@ lazy val app = ( project in file( "frontend/app" ) )
 	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
 //	  useYarn := true,
 	  webpack / version := "4.28.4",
+	  npmExtraArgs := Seq( "--legacy-peer-deps" ),
 	  webpackConfigFile := Some( baseDirectory.value / "app.config.js" ),
 	  webpackConfigFile in Test := Some( baseDirectory.value / "app.config.test.js" ),
   )
@@ -426,10 +428,10 @@ compileApp := ( DevConfig / compileApp ).value
 val compileConf = taskKey[ Unit ]( "Compile js config file" )
 
 ProdConfig / compileConf := {
-	s"npx webpack --mode production --config frontend/config-js/webpack.config.js" !
+	s"scripts/inject-config.sh" !
 }
 DevConfig / compileConf := {
-	s"npx webpack --mode development --config frontend/config-js/webpack.config.js" !
+	s"scripts/inject-config.sh" !
 }
 
 // Build Application

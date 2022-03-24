@@ -7,7 +7,7 @@ object Dependencies {
     val uPickleVersion = "1.3.8"
     val scalaTestVersion = "3.2.7"
     val uTestVersion = "0.7.10"
-    val dartAuthVersion = "3.1.144"
+    val dartAuthVersion = "3.1.11"
 
     val uPickle = Def.setting( Seq( "com.lihaoyi" %%% "upickle" % uPickleVersion ) )
     val scalaTest = Def.setting( Seq( "org.scalatest" %%% "scalatest" % scalaTestVersion % "test" ) )
@@ -29,8 +29,8 @@ object Dependencies {
     val scalaTagsVersion = "0.9.4"
     val circeYamlVersion = "0.12.0"
     val betterFilesVersion = "3.8.0"
-    val ontologyRegistryVersion = "3.0.20"
-    val conceptsApiVersion = "1.0.34"
+    val ontologyRegistryVersion = "3.0.12"
+    val conceptsApiVersion = "3.0.5"
 
     val scalaMock = Seq( "org.scalamock" %% "scalamock" % scalaMockVersion % "test" )
 

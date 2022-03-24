@@ -4,6 +4,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import better.files.Resource
 import com.mchange.v2.c3p0.ComboPooledDataSource
+import com.twosixlabs.dart.arangodb.ArangoConf
 import com.twosixlabs.dart.auth.controllers.SecureDartController
 import com.twosixlabs.dart.auth.tenant.indices.ArangoCorpusTenantIndex
 import com.twosixlabs.dart.auth.user.DartUser
@@ -11,17 +12,17 @@ import com.twosixlabs.dart.ontologies.OntologyRegistryService
 import com.twosixlabs.dart.ontologies.dao.sql.SqlOntologyArtifactTable
 import com.twosixlabs.dart.ontologies.kafka.KafkaOntologyUpdatesNotifier
 import com.twosixtech.dart.concepts.client.RestClusteringClient
-import com.twosixtech.dart.taxonomy.explorer.api.{OntologyPublicationApiDI, RootApiDI, StateAccessApiDI}
-import com.twosixtech.dart.taxonomy.explorer.clustering.{RestClusteringServiceDI, TestClusteringServiceDI}
+import com.twosixtech.dart.taxonomy.explorer.api.{ OntologyPublicationApiDI, RootApiDI, StateAccessApiDI }
+import com.twosixtech.dart.taxonomy.explorer.clustering.{ RestClusteringServiceDI, TestClusteringServiceDI }
 import com.twosixtech.dart.taxonomy.explorer.models.wm.WmDartClusterConceptBridgeDI
-import com.twosixtech.dart.taxonomy.explorer.models.{CuratedClusterDI, DartClusterDI, DartTaxonomyDI, UUIDTaxonomyIdDI, UUIDTaxonomyIdSerializationDI, WmDartConceptDI}
+import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartClusterDI, DartTaxonomyDI, UUIDTaxonomyIdDI, UUIDTaxonomyIdSerializationDI, WmDartConceptDI }
 import com.twosixtech.dart.taxonomy.explorer.provider.KafkaProvider
 import com.twosixtech.dart.taxonomy.explorer.publication.OntologyRegistryOntologyPublicationServiceDI
-import com.twosixtech.dart.taxonomy.explorer.routes.{AuthRouterDI, ClusterRoutesDI, OntologyOutputRouteDI, OntologyPublicationRoutesDI, StateAccessRoutesDI, StaticRoutes, TaxonomyRoutesDI, UserDataRoutesDI}
-import com.twosixtech.dart.taxonomy.explorer.serialization.{OntologyReaderDI, WmDartSerializationDI, WmOntologyWriterDI}
+import com.twosixtech.dart.taxonomy.explorer.routes.{ AuthRouterDI, ClusterRoutesDI, OntologyOutputRouteDI, OntologyPublicationRoutesDI, StateAccessRoutesDI, StaticRoutes, TaxonomyRoutesDI, UserDataRoutesDI }
+import com.twosixtech.dart.taxonomy.explorer.serialization.{ OntologyReaderDI, WmDartSerializationDI, WmOntologyWriterDI }
 import com.twosixtech.dart.taxonomy.explorer.userdata.VersionedUserDataStore
 import com.twosixtech.dart.taxonomy.explorer.userdata.UserDataStore
-import com.twosixtech.dart.taxonomy.explorer.userdata.postgres.{PgUserDataStore, PgVersionedUserDataStoreDI}
+import com.twosixtech.dart.taxonomy.explorer.userdata.postgres.{ PgUserDataStore, PgVersionedUserDataStoreDI }
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.ExecutionContextExecutor
@@ -93,7 +94,7 @@ object Main
         ds
     }
 
-    lazy private val tenantIndex = ArangoCorpusTenantIndex.apply( config )
+    lazy private val tenantIndex = ArangoCorpusTenantIndex( config )
 
     lazy private val kafkaProducer = new KafkaProvider( config.getConfig( "kafka" ) ).newProducer[ String, String ]
 
@@ -121,8 +122,7 @@ object Main
 
     private val authRouterDeps = SecureDartController.deps(
         serviceNameIn = "concepts",
-        secretKeyIn = Try( config.getString( "dart.auth.secret" ) ).toOption,
-        bypassAuthIn = Try( config.getBoolean( "dart.auth.bypass" ) ).getOrElse( Try( config.getString( "dart.auth.bypass" ).toBoolean ).getOrElse( false ) ),
+        config,
     )
 
     override val authDependencies : SecureDartController.Dependencies = authRouterDeps
