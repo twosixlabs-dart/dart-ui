@@ -34,28 +34,28 @@ services:
   #      - POSTGRES_DATABASE=dart_db
 
 #   Use this to run dart-ui from a docker build
-  dart-ui:
-    networks:
-      - dart_ui_network
-    hostname: dart-ui
-    container_name: dart-ui
-    ports:
-      - "80:8080"
-    image: twosixlabsdart/dart-ui:latest
-    environment:
-      - CLUSTERING_TEST_MODE=false
-      - CLUSTERING_HOST=concepts-api
-      - CLUSTERING_PORT=8080
-      - DART_AUTH_BYPASS=true
-      - ARANGODB_HOST=dart-arangodb
-      - KAFKA_BOOTSTRAP_SERVERS=kafka-broker-1:19092
-      - POSTGRES_HOST=dart-postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=dart
-      - POSTGRES_PASSWORD=dart_pass
-      - POSTGRES_DATABASE=dart_db
-      - PROCUREMENT_URL=http://localhost:8092
-      - SEARCH_URL=http://localhost:8088
+#  dart-ui:
+#    networks:
+#      - dart_ui_network
+#    hostname: dart-ui
+#    container_name: dart-ui
+#    ports:
+#      - "80:8080"
+#    image: twosixlabsdart/dart-ui:latest
+#    environment:
+#      - CLUSTERING_TEST_MODE=false
+#      - CLUSTERING_HOST=concepts-api
+#      - CLUSTERING_PORT=8080
+#      - DART_AUTH_BYPASS=true
+#      - ARANGODB_HOST=dart-arangodb
+#      - KAFKA_BOOTSTRAP_SERVERS=kafka-broker-1:19092
+#      - POSTGRES_HOST=dart-postgres
+#      - POSTGRES_PORT=5432
+#      - POSTGRES_USER=dart
+#      - POSTGRES_PASSWORD=dart_pass
+#      - POSTGRES_DATABASE=dart_db
+#      - PROCUREMENT_URL=http://localhost:8092
+#      - SEARCH_URL=http://localhost:8088
 
   corpex:
     networks:

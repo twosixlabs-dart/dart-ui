@@ -66,19 +66,8 @@ lazy val commonSettings = {
 	  )
 }
 
-lazy val publishSettings = Seq(
-	publishTo := {
-		if ( isSnapshot
-		  .value ) Some( "Cause Ex Nexus Repository Snapshots" at "https://nexus.causeex" +
-          ".com/repository/maven" )
-		else Some( "Cause Ex Nexus Repository Releases" at "https://nexus.causeex" +
-          ".com/repository/maven/" )
-	},
-	publishMavenStyle := true,
-)
-
 lazy val disablePublish = Seq(
-	publish := {}
+	skip.in( publish ) := true,
 )
 
 lazy val assemblySettings = Seq(
@@ -91,6 +80,24 @@ lazy val assemblySettings = Seq(
 	test in assembly := {},
 	mainClass in(Compile, packageBin) := Some( "Main" ),
 )
+
+sonatypeProfileName := "com.twosixlabs"
+inThisBuild(List(
+	organization := "com.twosixlabs.dart.ui",
+	homepage := Some(url("https://github.com/twosixlabs-dart/dart-ui")),
+	licenses := List("GNU-Affero-3.0" -> url("https://www.gnu.org/licenses/agpl-3.0.en.html")),
+	developers := List(
+		Developer(
+			"twosixlabs-dart",
+			"Two Six Technologies",
+			"",
+			url("https://github.com/twosixlabs-dart")
+		)
+	)
+))
+
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 
 /*
@@ -118,7 +125,6 @@ lazy val common = ( project in file( "common" ) )
 	  commonSettings,
 	  testFrameworks += new TestFramework( "utest.runner.Framework" ),
 	  libraryDependencies ++= uPickle.value ++ uTest.value ++ scalaTest.value,
-	  publishSettings,
   )
 
 lazy val backend = ( project in file( "backend" ) )
@@ -135,7 +141,6 @@ lazy val api = ( project in file( "backend/api" ) )
   .settings(
 	  commonSettings,
 	  libraryDependencies ++= logging ++ uPickle.value ++ scalaTest.value,
-	  publishSettings,
   )
 
 lazy val services = ( project in file( "backend/services" ) )
