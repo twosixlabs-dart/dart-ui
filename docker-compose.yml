@@ -3,7 +3,6 @@ services:
   # This docker-compose network is configured to match the configuration used in
   # scripts/dev-sbt.sh and scripts/js-dev-server.sh to launch development environments.
 
-
   # Use this to run concepts-ui from sbt within the network
   #  dart-ui-runner:
   #    networks:
@@ -132,6 +131,19 @@ services:
       - POSTGRES_USER=dart
       - POSTGRES_PASSWORD=dart_pass
       - POSTGRES_DATABASE=dart_db
+
+  dart-tenants:
+    image: twosixlabsdart/dart-tenants:latest
+    hostname: dart-tenants
+    container_name: dart-tenants
+    ports:
+      - "8095:8080"
+    networks:
+      - dart_ui_network
+    environment:
+      DART_AUTH_BYPASS: "true"
+      TENANTS_TEST_MODE: "true"
+      CORS_ALLOWED_ORIGINS: http://localhost:8080,http://localhost:80,http://localhost
 
   kafka-broker-1:
     image: twosixlabsdart/confluent-kafka:latest

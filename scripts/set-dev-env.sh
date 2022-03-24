@@ -22,6 +22,7 @@ export POSTGRES_PORT=5432
 export POSTGRES_USER=dart
 export POSTGRES_PASSWORD=dart_pass
 export POSTGRES_DATABASE=dart_db
+export TENANTS_URL=http://localhost:8095
 export BACKEND_PUBLIC_DIR=$(pwd)/public
 
 # Sbt parameters

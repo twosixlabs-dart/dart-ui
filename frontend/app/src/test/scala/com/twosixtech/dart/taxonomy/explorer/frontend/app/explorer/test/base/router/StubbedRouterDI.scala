@@ -13,7 +13,7 @@ trait StubbedRouterDI extends DartRouterDI {
 
         case object TestPage extends DartRoute
 
-        private val stubbedComponent = ReactComponent.functional[ Context => VdomElement ] {
+        private val stubbedComponent = ReactComponent.functional[ Context => VdomNode ] {
             renderer =>
                 val context = Context(
                     TestPage,
@@ -23,8 +23,8 @@ trait StubbedRouterDI extends DartRouterDI {
         }
 
         override def ContextBuilder(
-            renderer : Context => VdomElement,
-        ) : Unmounted[ Context => VdomElement, _, _ ] = stubbedComponent( renderer )
+            renderer : Context => VdomNode,
+        ) : Unmounted[ Context => VdomNode, _, _ ] = stubbedComponent( renderer )
 
     }
 

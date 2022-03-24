@@ -13,9 +13,9 @@ import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 import Title from '../../../common/components/Title';
 import TextQuery from '../../../common/components/TextQuery';
 import { setUploadMetaData, updateLabelsText } from '../../redux/actions/uploadFiles.actions';
-import { USE_DART_AUTH } from '../../../common/config/constants';
 
 import { connect } from '../../../dart-ui/context/CustomConnect';
+import { chooseTenant } from '../../../dart-ui/redux/actions/dart.actions';
 
 const styles = () => ({
   paper: {
@@ -49,19 +49,19 @@ class MetadataForm extends Component {
     this.updateMetadataFieldFromEventTarget = this.updateMetadataFieldFromEventTarget.bind(this);
     this.updateLabels = this.updateLabels.bind(this);
     this.updateLabelsText = this.updateLabelsText.bind(this);
+  }
 
+  componentDidMount() {
     const {
       metaData,
       dispatchSetUploadMetaData,
-      tenants,
+      tenantId,
     } = this.props;
 
-    if (tenants.length > 0) {
-      dispatchSetUploadMetaData({
-        ...metaData,
-        tenants: [tenants[0]],
-      });
-    }
+    dispatchSetUploadMetaData({
+      ...metaData,
+      tenants: [tenantId],
+    });
   }
 
   updateMetadataField = (field) => (text) => {
@@ -91,11 +91,12 @@ class MetadataForm extends Component {
     const {
       metaData,
       labelsText,
+      dispatchSetUploadMetaData,
       tenants,
+      tenantId,
+      dispatch,
       classes,
     } = this.props;
-
-    const authDisabled = !USE_DART_AUTH;
 
     const labelElements = metaData.labels.map((v) => (
       <Grid item key={`label-el-${v}`}>
@@ -128,7 +129,7 @@ class MetadataForm extends Component {
         <Title>Metadata</Title>
         <div className={classes.padded}>
           <Grid item xs={12} classes={{ root: classes.fieldSpacing }}>
-            {(!authDisabled && tenants.length > 0) ? (
+            {tenants.length > 0 ? (
               <Grid
                 container
                 direction="row"
@@ -148,8 +149,14 @@ class MetadataForm extends Component {
                 </Typography>
                 <Select
                   native
-                  value={metaData.tenants[0] || ''}
-                  onChange={(e) => this.updateMetadataFieldFromEventTarget('tenants')({ target: { value: [e.target.value] } })}
+                  value={tenantId || ''}
+                  onChange={(e) => {
+                    dispatch(chooseTenant(e.target.value));
+                    dispatchSetUploadMetaData({
+                      ...metaData,
+                      tenants: [tenantId],
+                    });
+                  }}
                   inputProps={{
                     name: 'relevance',
                     id: 'relevance-select-input',
@@ -235,6 +242,7 @@ class MetadataForm extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
+  dispatch,
   dispatchSetUploadMetaData: (metaData) => {
     dispatch(setUploadMetaData(metaData));
   },
@@ -248,21 +256,23 @@ function mapStateToProps(state, dartContext) {
     metaData: state.forklift.metaData,
     labelsText: state.forklift.labelsText,
     tenants: dartContext.tenants,
+    tenantId: state.dart.nav.tenantId,
   };
 }
 
 MetadataForm.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   dispatchSetUploadMetaData: PropTypes.func.isRequired,
   dispatchUpdateLabelsText: PropTypes.func.isRequired,
   labelsText: PropTypes.string.isRequired,
   metaData: PropTypes.shape({
-    tenants: PropTypes.arrayOf(PropTypes.string),
     labels: PropTypes.arrayOf(PropTypes.string).isRequired,
     // ingestion_system: PropTypes.string,
     // relevance: PropTypes.string.isRequired,
     genre: PropTypes.string.isRequired,
   }).isRequired,
   tenants: PropTypes.arrayOf(PropTypes.string).isRequired,
+  tenantId: PropTypes.string.isRequired,
   classes: PropTypes.shape({
     padded: PropTypes.string,
     paper: PropTypes.string,

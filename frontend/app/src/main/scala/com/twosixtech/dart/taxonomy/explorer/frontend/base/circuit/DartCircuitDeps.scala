@@ -2,12 +2,12 @@ package com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit
 
 import com.twosixtech.dart.scalajs.react.ReactComponent
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartStateDI
-import diode.react.{ModelProxy, ReactConnectProps, ReactConnectProxy, ReactConnector}
-import diode.{ActionHandler, ActionResult, ActionType, Circuit, ModelRW, RootModelRW}
-import japgolly.scalajs.react.{Callback, CtorType, ScalaComponent, preventDefaultAndStopPropagation}
+import diode.react.{ ModelProxy, ReactConnectProps, ReactConnectProxy, ReactConnector }
+import diode.{ ActionHandler, ActionResult, ActionType, Circuit, ModelRW, RootModelRW }
+import japgolly.scalajs.react.{ Callback, CtorType, ScalaComponent, preventDefaultAndStopPropagation }
 import japgolly.scalajs.react.component.Generic
-import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
-import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.component.Scala.{ BackendScope, Component }
+import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
 
 trait DartCircuitDeps {
     this : DartStateDI =>
@@ -95,22 +95,22 @@ trait DartCircuitDeps {
             state : DartState,
         )
 
-        class ContextBuilderBackend( scope : BackendScope[ Context => VdomElement, Unit ] ) {
+        class ContextBuilderBackend( scope : BackendScope[ Context => VdomNode, Unit ] ) {
             val dartCircuit = new DartCircuit
 
             import diode.AnyAction.aType
-            def render( renderer : Context => VdomElement ) : VdomElement = {
+            def render( renderer : Context => VdomNode ) : VdomNode = {
                 connector( dartCircuit )( ( proxy : ModelProxy[ DartState ] ) => {
                     val dispatcher = ( action : DartAction ) => proxy.dispatchCB( action )
                     val state = proxy.modelReader.value
-                    renderer( Context( dartCircuit, dispatcher, state ) )
+                    renderer( Context( dartCircuit, dispatcher, state ) ).asInstanceOf[ VdomElement ]
                 } )
             }
         }
 
         lazy val ContextBuilder = {
             import diode.AnyAction.aType
-            ScalaComponent.builder[ Context => VdomElement ]
+            ScalaComponent.builder[ Context => VdomNode ]
               .initialState()
               .backend( new ContextBuilderBackend( _ ) )
               .renderBackend

@@ -22,8 +22,8 @@ trait DartRouterDI extends DartRouterDeps {
 
         case object NotFoundRoute extends DartRoute
 
-        lazy val routeConfig : RouterWithPropsConfig[ DartRoute, Context => VdomElement ] = {
-            RouterWithPropsConfigDsl[ DartRoute, Context => VdomElement ].buildConfig { ( dsl : RouterConfigDsl[ DartRoute, Context => VdomElement ] ) =>
+        lazy val routeConfig : RouterWithPropsConfig[ DartRoute, Context => VdomNode ] = {
+            RouterWithPropsConfigDsl[ DartRoute, Context => VdomNode ].buildConfig { ( dsl : RouterConfigDsl[ DartRoute, Context => VdomNode ] ) =>
                 import dsl._
 
                 val conceptRoute = staticRoute( root / "concepts", ConceptExplorerRoute ) ~> {
@@ -46,20 +46,20 @@ trait DartRouterDI extends DartRouterDeps {
 
                 ( conceptRoute | documentRoute | corpexRoute | forkliftRoute | testRoute )
                   .notFound( redirectToPage( ConceptExplorerRoute )( SetRouteVia.HistoryPush ) )
-                  .renderWithP( ( rCtl : RouterCtl[ DartRoute ], rWp : ResolutionWithProps[ DartRoute, Context => VdomElement ] ) => {
-                      ( renderer : Context => VdomElement ) => {
-                          renderer( Context( rWp.page, rCtl.set ) )
+                  .renderWithP( ( rCtl : RouterCtl[ DartRoute ], rWp : ResolutionWithProps[ DartRoute, Context => VdomNode ] ) => {
+                      ( renderer : Context => VdomNode ) => {
+                          renderer( Context( rWp.page, rCtl.set ) ).asInstanceOf[ VdomElement ]
                       }
                   } )
             }
         }
 
         lazy val ContextBuilderComponent = {
-            RouterWithProps.componentUnbuilt[ DartRoute, Context => VdomElement ]( BaseUrl.fromWindowOrigin, routeConfig ).build
+            RouterWithProps.componentUnbuilt[ DartRoute, Context => VdomNode ]( BaseUrl.fromWindowOrigin, routeConfig ).build
         }
 
 
-        def ContextBuilder( renderer : Context => VdomElement ) : Unmounted[ Context => VdomElement, _, _ ] = ContextBuilderComponent( renderer )
+        def ContextBuilder( renderer : Context => VdomNode ) : Unmounted[ Context => VdomNode, _, _ ] = ContextBuilderComponent( renderer )
     }
 
     override lazy val DartRouter : DartAppRouter = new DartAppRouter

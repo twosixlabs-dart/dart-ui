@@ -1,7 +1,7 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend
 
 import com.twosixtech.dart.scalajs.dom.DomUtils
-import com.twosixtech.dart.taxonomy.explorer.api.{ClusteringApiDI, RootApiDeps, UserDataApiDI}
+import com.twosixtech.dart.taxonomy.explorer.api.{ ClusteringApiDI, RootApiDeps, UserDataApiDI }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.GenericDartRootDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.DartLoadingDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.interface.DartLoadingInterfaceDI
@@ -12,17 +12,18 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curat
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.state.access.StateAccessComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.tenant.ontology.TenantOntologyComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.layouts.wm.WmDartAppWindowLayoutDI
-import com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.{DartAppWindowDI, DartFrameDI, DartFrameStack, DartMenuBarDI, DartMenuDI}
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.backend.{DartBackendDeps, KeycloakXhrDartBackendDI}
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit.{DartCircuitDeps, GenericDartCircuitDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.{ DartAppWindowDI, DartFrameDI, DartFrameStack, DartMenuBarDI, DartMenuDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.backend.{ DartBackendDeps, KeycloakXhrDartBackendDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit.{ DartCircuitDeps, GenericDartCircuitDI }
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.js.JsDartContextProviderDI
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.{DartContextDeps, GenericDartContextDI}
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.router.{DartRouterDI, DartRouterDeps}
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.{DartComponentDI, DartRootDeps, DartStateDI}
-import com.twosixtech.dart.taxonomy.explorer.frontend.configuration.{DartConfigDeps, GenericDartConfigDI, RootApiDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.tenants.{ DartTenantsContextDeps, GenericDartTenantContextDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.{ DartContextDeps, GenericDartContextDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.router.{ DartRouterDI, DartRouterDeps }
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.{ DartComponentDI, DartRootDeps, DartStateDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.configuration.{ DartConfigDeps, GenericDartConfigDI, RootApiDI }
 import com.twosixtech.dart.taxonomy.explorer.models.wm.WmDartClusterConceptBridgeDI
-import com.twosixtech.dart.taxonomy.explorer.models.{CuratedClusterDI, DartClusterConceptBridgeDeps, DartClusterDI, DartConceptDeps, DartTaxonomyDI, TaxonomyIdDeps, TaxonomyIdSerializationDeps, UUIDTaxonomyIdDI, UUIDTaxonomyIdSerializationDI, WmDartConceptDI}
-import com.twosixtech.dart.taxonomy.explorer.serialization.{DartSerializationDeps, WmDartSerializationDI}
+import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartClusterConceptBridgeDeps, DartClusterDI, DartConceptDeps, DartTaxonomyDI, TaxonomyIdDeps, TaxonomyIdSerializationDeps, UUIDTaxonomyIdDI, UUIDTaxonomyIdSerializationDI, WmDartConceptDI }
+import com.twosixtech.dart.taxonomy.explorer.serialization.{ DartSerializationDeps, WmDartSerializationDI }
 
 
 object DartApp {
@@ -37,6 +38,7 @@ object DartApp {
       extends GenericDartCircuitDI
         with DartConfigDeps
         with DartRouterDI
+        with DartTenantsContextDeps
         with DartContextDeps
         with DartBackendDeps {
         this : DartComponentDI
@@ -63,6 +65,7 @@ object DartApp {
         with GenericDartConfigDI
         with GenericDartCircuitDI
         with DartRouterDI
+        with GenericDartTenantContextDI
         with GenericDartContextDI
         with JsDartContextProviderDI
         with KeycloakXhrDartBackendDI {

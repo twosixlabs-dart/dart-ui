@@ -1,10 +1,10 @@
 package com.twosixtech.dart.scalajs.react
 
-import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
+import japgolly.scalajs.react.component.Scala.{ Component, Unmounted }
 import japgolly.scalajs.react.component.builder.Lifecycle
 import japgolly.scalajs.react.internal.Box
-import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo, Children, CtorType, ScalaComponent, UpdateSnapshot}
+import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
+import japgolly.scalajs.react.{ BackendScope, Callback, CallbackTo, Children, CtorType, ScalaComponent, UpdateSnapshot }
 
 trait ReactComponent[ PropsType, StateType ] {
     type BackendType
@@ -14,9 +14,9 @@ trait ReactComponent[ PropsType, StateType ] {
 
 object ReactComponent {
 
-    def functional[ PropsType ]( fn : PropsType => VdomElement ) : ReactComponent[ PropsType, Unit ] = {
+    def functional[ PropsType ]( fn : PropsType => VdomNode ) : ReactComponent[ PropsType, Unit ] = {
         new SimpleReactComponent[ PropsType ] {
-            override protected def render( props : PropsType ) : VdomElement = fn( props )
+            override protected def render( props : PropsType ) : VdomNode = fn( props )
         }
     }
 
@@ -25,7 +25,7 @@ object ReactComponent {
 trait SimpleReactComponent[ PropsType ] extends ReactComponent[ PropsType, Unit ] {
     type BackendType = Unit
 
-    protected def render( props : PropsType ) : VdomElement
+    protected def render( props : PropsType ) : VdomNode
 
     lazy val component = {
         ScalaComponent.builder[ PropsType ]
