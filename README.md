@@ -1,30 +1,26 @@
-# Concepts Explorer
+# DART UI
 
 ## Overview
 
-This application is the frontend for the Ontology-In-A-Day (OIAD) workflow. It 
-allows a user to do the following:
-* Build a World Modelers ontology from scratch or edit an existing World Modelers ontology
-* Retrieve clustering outputs for a given corpus, and add clusters to a World Modelers ontology
-* Save and retrieve versions of an ontology
-* Publish an updated version of an ontology, triggering the regrounding of all documents to the new version
+This application is the visual user-interface for several DART functionalities:
+
+1. Document Upload (Forklift): submit documents with or without custom metadata for ingestion by 
+   the DART pipeline
+2. Corpus Exploration (Corpex): search corpora by extracted text, extracted metadata, or analytic 
+   annotations.
+3. Concepts Explorer: build and publish ontologies used by connected reader technologies.
 
 ## Dependencies
-DART is a Scala application, using Akka-http for the backend and Scala.js for the frontend. In addition 
-to the publicly available libraries it uses, it has dependencies on a number of other Scala libraries.
-In order to build DART these dependencies must be accessible via the local filesystem (in the SBT cache) 
-or over the network via [Sonatype Nexus](https://www.sonatype.com/products/repository-oss-download) where 
-they are published. DART requires the following dependencies to be built/installed:
-
-| Group ID                       | Artifact ID                     |
-|--------------------------------|---------------------------------|
-| com.twosixlabs.dart.auth       | controllers_2.12                |
-| com.twosixlabs.dart.auth       | arrango-tenants_2.12            |
-| com.twosixlabs.dart.ontologies | ontology-registry-services_2.12 |
+DART-UI is a Scala application, using Akka-http for the backend and a combination Scala.js and ES6 
+for the frontend. In addition to the publicly available libraries it uses, it has dependencies on a 
+number of other Scala, Java, and JavaScript libraries. In order to build DART-UI these dependencies 
+must be accessible via the local filesystem (in the SBT cache) or over the network via 
+[Sonatype Nexus](https://www.sonatype.com/products/repository-oss-download) and npm where they are 
+published.
 
 ## Building
-This project is built using SBT and webpack. For more information on installation and configuration 
-of SBT please [see the documentation](https://www.scala-sbt.org/1.x/docs/)
+This project is built using SBT, npm, and webpack. For more information on installation and 
+configuration of SBT please [see the documentation](https://www.scala-sbt.org/1.x/docs/)
 
 The build configuration is considerably more complicated than most standard sbt configurations 
 due to the fact that build outputs of the frontend scala.js subproject are required as inputs for 
@@ -85,7 +81,7 @@ webpack-dev-server):
 
 Configuration for the application is defined in two places:
 * backend/server/src/main/resources/application.conf
-* frontend/js-components/src/config/env/default.js
+* frontend/config-js/src/config/env/default.js
 
 Most configuration inputs either require or can be overridden at runtime via environment 
 variables:
@@ -112,7 +108,7 @@ variables:
 | POSTGRES_MAX_CONNECTIONS    | maximum allowed number of concurrent postgress connections     | `6`                       |
 | KAFKA_BOOTSTRAP_SERVERS     | base url for kafka provider                                    | `kafka-broker-1:19092`    |
 | BACKEND_PUBLIC_DIR          | directory where static files are served                        | `/opt/app/public`         |
-| DART_BASE_PATH              | base path for all rest requests                                | `/concepts/explorer`      |
+| DART_BASE_PATH              | base path for REST requests                                    | `/concepts/explorer`      |
 | DART_AUTH_SECRET            | secret used for reading auth token                             | `xxxxxxxxxxxx`            |
 | DART_AUTH_BYPASS            | disable authentication/authorization                           | `false`                   |
 
@@ -157,7 +153,7 @@ Corpex and Forkfift. `components` contains reusable Scala.js components used by 
 published as Maven artifacts for external use, as well as any pure JS code required by these. 
 `config-js` contains the configuration code which is built by webpack at runtime in order to inject 
 configuration pulled from environment variables into the frontend application. Finally, 
-`scala13-components` contains any scalajs components that can only be compiled using scala 2.13.
+`scala13-components` contains any scalajs components that can only be compiled using scala 2.13. 
 
 
 ## WARNINGS

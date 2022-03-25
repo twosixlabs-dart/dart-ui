@@ -9,12 +9,22 @@ scripts/inject-config.sh
 
 cd ../..
 
-docker-compose up -d
+docker-compose up -d || exit 1
 
-cd frontend/app-js
+sbt scala13Components/fullLinkJS
 
-npx webpack-dev-server
+cd frontend/scala13-components || exit 1
+npm install --legacy-peer-deps || exit 1
+npm run package || exit 1
 
-cd ..
+cd ../components || exit 1
+npm install --legacy-peer-deps || exit 1
+npm run package || exit 1
+
+cd ../app-js || exit 1
+
+npx webpack-dev-server || exit 1
+
+cd .. || exit 1
 
 docker-compose down
