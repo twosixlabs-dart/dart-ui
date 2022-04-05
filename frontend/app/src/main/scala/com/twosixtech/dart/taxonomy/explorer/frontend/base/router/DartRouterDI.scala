@@ -45,7 +45,7 @@ trait DartRouterDI extends DartRouterDeps {
                 }
 
                 ( conceptRoute | documentRoute | corpexRoute | forkliftRoute | testRoute )
-                  .notFound( redirectToPage( ConceptExplorerRoute )( SetRouteVia.HistoryPush ) )
+                  .notFound( redirectToPage( CorpexRoute )( SetRouteVia.HistoryPush ) )
                   .renderWithP( ( rCtl : RouterCtl[ DartRoute ], rWp : ResolutionWithProps[ DartRoute, Context => VdomNode ] ) => {
                       ( renderer : Context => VdomNode ) => {
                           renderer( Context( rWp.page, rCtl.set ) ).asInstanceOf[ VdomElement ]
