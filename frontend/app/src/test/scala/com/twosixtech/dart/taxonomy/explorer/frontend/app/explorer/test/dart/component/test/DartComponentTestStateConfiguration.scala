@@ -19,7 +19,7 @@ trait DartComponentTestStateConfiguration
         import ContextHook.HookedNode
 
         def getDartContext( ) : DartContext = {
-            ele.retrieveContext[ ContextHook ]
+            ele.retrieveContext[ ContextHook ]( Some( contextHookId ) )
               .getContext()
               .asInstanceOf[ DartContext ]
         }
