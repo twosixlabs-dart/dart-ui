@@ -1,7 +1,9 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.layouts
 
+import com.twosixtech.dart.scalajs.layout.button.regular.Button
 import com.twosixtech.dart.scalajs.layout.button.regular.mui.ButtonMui
 import com.twosixtech.dart.scalajs.layout.form.textinput.{ TextInput, TextInputMui }
+import com.twosixtech.dart.scalajs.layout.text.TextMui
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.{ DartTenantsDI, DartTenantsLayoutDeps }
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
@@ -29,28 +31,49 @@ trait GenericDartTenantsLayoutDI
 			renderProps : Unit,
 			context : DartContext
 		) : VdomElement = {
+
+			import GenericDartTenantsLayoutClasses._
+			import com.twosixtech.dart.scalajs.layout.styles.ClassNameConversions._
+
 			<.div(
 				ButtonMui(
 					onClick = props.refreshTenants,
-					element = "Refresh"
+					element = "Refresh",
+					classes = Button.Classes( refreshButtonClass.cName ),
 				),
-				props.tenants.map( v => <.div( v ) ).toVdomArray,
+				<.div(
+					tenantsListClass.cName,
+					props.tenants.map( v => <.div(
+						tenantClass.cName,
+						TextMui(
+							v
+						),
+						ButtonMui(
+							onClick = props.removeTenant( v ),
+							element = "Remove",
+							classes = Button.Classes( removeTenantButtonClass.cName )
+						),
+					) ).toVdomArray,
+				),
 				state match {
 					case None =>
 						ButtonMui(
 							onClick = scope.setState( Some( "" ) ),
-							element = "Add"
+							element = "Add",
+							classes = Button.Classes( addTenantButtonClass.cName )
 						)
 					case Some( tenantId ) =>
 						<.div(
 							TextInputMui( TextInput.Props(
 								value = Some( tenantId ),
 								onChange = Some( newId => scope.setState( Some( newId ) ) ),
-								onEnter = Some( props.addTenant( tenantId ) >> scope.setState( None ) )
+								onEnter = Some( props.addTenant( tenantId ) >> scope.setState( None ) ),
+								classes = TextInput.Classes( input = newTenantInputClass.cName )
 							) ),
 							ButtonMui(
 								onClick = props.addTenant( tenantId ) >> scope.setState( None ),
 								element = "Add",
+								classes = Button.Classes( addTenantInputButtonClass.cName )
 							),
 						)
 				},
