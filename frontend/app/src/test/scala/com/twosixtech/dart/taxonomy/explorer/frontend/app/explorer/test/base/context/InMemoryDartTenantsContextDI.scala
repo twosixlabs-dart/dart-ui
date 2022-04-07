@@ -56,12 +56,13 @@ trait InMemoryDartTenantsContextDI
 			  .asInstanceOf[ TestTenantsJsHook ]
 			  .getState()
 
-		def modState( mod : TestTenantsState => TestTenantsState ) : Unit =
+		def modState( mod : TestTenantsState => TestTenantsState ) : Unit = {
 			document.querySelector( s"#$eleId" )
 			  .asInstanceOf[ js.Dynamic ]
 			  .contextHook
 			  .asInstanceOf[ TestTenantsJsHook ]
 			  .modState( mod )
+		}
 	}
 
 	override type DartTenantsContextState = TestTenantsState
@@ -87,7 +88,7 @@ trait InMemoryDartTenantsContextDI
 		  .initialState( TestTenantsState() )
 		  .backend( scope => {
 			  val be = new Backend( scope )
-			  be.refresh
+			  be.injectContext()
 			  be
 		  } )
 		  .renderBackend
