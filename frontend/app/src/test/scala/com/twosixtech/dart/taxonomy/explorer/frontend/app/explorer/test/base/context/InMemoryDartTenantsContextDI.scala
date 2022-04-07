@@ -11,10 +11,15 @@ import org.scalajs.dom.document
 
 import java.util.UUID
 import scala.scalajs.js
-import scala.util.{ Failure, Success, Try }
 
 import com.twosixtech.dart.scalajs.dom.DomUtils.NodeListExtensions
 
+
+@js.native
+trait TestTenantsJsHook extends js.Object {
+	var getState : js.Any = js.native
+	var modState : js.Any = js.native
+}
 
 
 trait InMemoryDartTenantsContextDI
@@ -24,14 +29,8 @@ trait InMemoryDartTenantsContextDI
 	object TestTenantsHook {
 		private val eleId : String = UUID.randomUUID().toString
 
-		@js.native
-		trait TestTenantsHook extends js.Object {
-			var getState : js.Function0[ TestTenantsState ] = js.native
-			var modState : js.Function1[ TestTenantsState => TestTenantsState, Unit ] = js.native
-		}
-
 		def injectContext( getter : () => TestTenantsState, setter : ( TestTenantsState => TestTenantsState ) => Unit ) : Unit = {
-			val hook = ( new js.Object ).asInstanceOf[ TestTenantsHook.TestTenantsHook ]
+			val hook = ( new js.Object ).asInstanceOf[ TestTenantsJsHook ]
 			hook.modState = setter
 			hook.getState = getter
 
@@ -50,15 +49,15 @@ trait InMemoryDartTenantsContextDI
 			document.querySelector( s"#$eleId" )
 			  .asInstanceOf[ js.Dynamic ]
 			  .contextHook
-			  .asInstanceOf[ TestTenantsHook ]
-			  .getState()
+			  .asInstanceOf[ TestTenantsJsHook ]
+			  .getState.asInstanceOf[ () => TestTenantsState ]()
 
 		def modState( mod : TestTenantsState => TestTenantsState ) : Unit =
 			document.querySelector( s"#$eleId" )
 			  .asInstanceOf[ js.Dynamic ]
 			  .contextHook
-			  .asInstanceOf[ TestTenantsHook ]
-			  .modState( mod )
+			  .asInstanceOf[ TestTenantsJsHook ]
+			  .modState.asInstanceOf[ ( TestTenantsState => TestTenantsState ) => Unit ]( mod )
 
 		case class TestTenantsState(
 			tenants : Seq[ DartTenant ] = Nil,
