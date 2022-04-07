@@ -11,6 +11,7 @@ trait DartTestConfig extends js.Object {
     var publicReportDuration : Int = js.native
     var basePath : String = js.native
     var disableAuth : Boolean = js.native
+    var tenantsBaseUrl : String = js.native
 }
 
 trait DartTestConfigDI extends DartConfigDeps {
@@ -24,6 +25,7 @@ trait DartTestConfigDI extends DartConfigDeps {
         dc.publicReportDuration = 0
         dc.basePath = ""
         dc.disableAuth = false
+        dc.tenantsBaseUrl = "test-tenants-url"
         dc.asInstanceOf[ DartConfig ]
     }
 
