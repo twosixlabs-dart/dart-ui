@@ -1,9 +1,9 @@
 package com.twosixtech.dart.scalajs.react
 
-import japgolly.scalajs.react.component.Scala.Unmounted
+import japgolly.scalajs.react.component.Scala.{ BackendScope, Unmounted }
 import japgolly.scalajs.react.component.builder.Lifecycle
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo}
+import japgolly.scalajs.react.{ Callback, CallbackTo }
 
 trait AppProps[ MainPropsType, RenderPropsType, AppContext ] {
     val mainProps : MainPropsType

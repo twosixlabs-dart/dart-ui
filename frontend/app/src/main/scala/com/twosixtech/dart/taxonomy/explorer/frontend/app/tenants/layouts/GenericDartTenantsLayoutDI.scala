@@ -1,9 +1,12 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.layouts
 
+import com.twosixtech.dart.scalajs.layout.button.regular.mui.ButtonMui
+import com.twosixtech.dart.scalajs.layout.form.textinput.{ TextInput, TextInputMui }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.{ DartTenantsDI, DartTenantsLayoutDeps }
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
 import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.vdom.html_<^._
 
 trait GenericDartTenantsLayoutDI
   extends DartTenantsLayoutDeps {
@@ -12,24 +15,49 @@ trait GenericDartTenantsLayoutDI
 	  with DartContextDeps =>
 
 	override type DartTenantsRenderContext = Unit
-	override type DartTenantsLayoutState = Unit
+	override type DartTenantsLayoutState = Option[ String ]
 
 	override val dartTenantsLayout : DartTenantsLayout = GenericDartTenantsLayout
 
 	object GenericDartTenantsLayout extends DartTenantsLayout {
 		override def render(
 			scope : Scope,
-			state : Unit,
+			state : Option[ String ],
 			props : DartTenants.LayoutProps
 		)(
 			implicit
 			renderProps : Unit,
 			context : DartContext
 		) : VdomElement = {
-			???
+			<.div(
+				ButtonMui(
+					onClick = props.refreshTenants,
+					element = "Refresh"
+				),
+				props.tenants.map( v => <.div( v ) ).toVdomArray,
+				state match {
+					case None =>
+						ButtonMui(
+							onClick = scope.setState( Some( "" ) ),
+							element = "Add"
+						)
+					case Some( tenantId ) =>
+						<.div(
+							TextInputMui( TextInput.Props(
+								value = Some( tenantId ),
+								onChange = Some( newId => scope.setState( Some( newId ) ) ),
+								onEnter = Some( props.addTenant( tenantId ) >> scope.setState( None ) )
+							) ),
+							ButtonMui(
+								onClick = props.addTenant( tenantId ) >> scope.setState( None ),
+								element = "Add",
+							),
+						)
+				},
+			)
 		}
 
-		override val initialState : Unit = ()
+		override val initialState : Option[ String ] = None
 	}
 }
 

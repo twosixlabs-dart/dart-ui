@@ -40,6 +40,7 @@ trait DartTenantsDI {
 				},
 				addTenant,
 				removeTenant,
+				context.refreshTenants,
 			).toDartProps )
 		}
 	}
@@ -51,6 +52,7 @@ trait DartTenantsDI {
 			tenants : Seq[ String ],
 			addTenant : String => Callback,
 			removeTenant : String => Callback,
+			refreshTenants : Callback,
 		)
 	}
 
