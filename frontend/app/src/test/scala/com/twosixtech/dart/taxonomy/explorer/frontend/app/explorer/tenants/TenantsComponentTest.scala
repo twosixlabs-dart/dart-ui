@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait TenantsComponentTest
   extends TenantsComponentTestConfig {
 
-    implicit def tenantEq : Equal[ DartTenant ] = new Equal[ DartTenant ]( (a, b) => a == b )
+    implicit def tenantEq : Equal[ DartTenant ] = new Equal[ DartTenant ]( _ == _ )
 
     override def tests : Tests = Tests {
         test( "Check integration between mocking and DartContext" ) {

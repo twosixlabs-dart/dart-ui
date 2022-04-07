@@ -31,18 +31,16 @@ trait TenantsComponentTestConfig
     abstract class ObsType( ele : HTMLElement )
       extends TestHookObserver( ele ) {
 
-        import TestTenantsHook._
-
         // Read state
         def getContextTenants : Seq[ DartTenant ] = getDartContext().tenants
         def contextTenantExists( tenant : DartTenant ) : Boolean = getContextTenants.contains( tenant )
-        def getMockedTenants : Seq[ DartTenant ] = TestTenantsService.tenants
+        def getMockedTenants : Seq[ DartTenant ] = TestTenantsHook.getState.tenants
         def mockedTenantExists( tenant : DartTenant ) : Boolean = getMockedTenants.contains( tenant )
 
         // Update state
-        def addMockedTenant( tenant : String ) : Unit = TestTenantsService.addTenant( tenant )
-        def removeMockedTenant( tenant : String ) : Unit = TestTenantsService.removeTenant( tenant )
-        def clearMockedTenants() : Unit = TestTenantsService.tenants = Seq.empty
+        def addMockedTenant( tenant : String ) : Unit = TestTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenant ) +: v.tenants ) )
+        def removeMockedTenant( tenant : String ) : Unit = TestTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenant ) ) ) )
+        def clearMockedTenants() : Unit = TestTenantsHook.modState( v => v.copy( tenants = Nil ) )
         def refreshContextTenants() : Unit = getDartContext().refreshTenants.runNow()
 
         // Read methods
@@ -88,10 +86,10 @@ trait TenantsComponentTestConfig
         _.setHandler { ( method, request ) =>
             (method, request) match {
                 case (HttpMethod.Post, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
-                    TestTenantsHook.TestTenantsService.addTenant( tenantId )
+                    TestTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenantId ) +: v.tenants ) )
                     HttpResponse( Map.empty[ String, String ], 201, NoBody )
                 case (HttpMethod.Delete, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
-                    TestTenantsHook.TestTenantsService.removeTenant( tenantId )
+                    TestTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenantId ) ) ) )
                     HttpResponse( Map.empty[ String, String ], 200, NoBody )
                 case (m, r) =>
                     throw new Exception( s"Unexpected request: method: $m, response: $r" )

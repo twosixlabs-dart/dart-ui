@@ -7,6 +7,14 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.tenants.DartT
 import japgolly.scalajs.react.component.Scala.{ BackendScope, Unmounted }
 import japgolly.scalajs.react.vdom.VdomNode
 import japgolly.scalajs.react.{ Callback, ScalaComponent }
+import org.scalajs.dom.document
+
+import java.util.UUID
+import scala.scalajs.js
+import scala.util.{ Failure, Success, Try }
+
+import com.twosixtech.dart.scalajs.dom.DomUtils.NodeListExtensions
+
 
 
 trait InMemoryDartTenantsContextDI
@@ -14,16 +22,47 @@ trait InMemoryDartTenantsContextDI
 	this : DartBackendDeps with ErrorHandlerDI =>
 
 	object TestTenantsHook {
-		object TestTenantsService {
-			var tenants : Seq[ DartTenant ] = Seq.empty
-			def addTenant( tenant : String ) : Unit =
-				tenants = DartTenant.fromString( tenant ) +: tenants
-			def removeTenant( tenant : String ) : Unit =
-				tenants = tenants.filter( _ != DartTenant.fromString( tenant ) )
+		private val eleId : String = UUID.randomUUID().toString
+
+		@js.native
+		trait TestTenantsHook extends js.Object {
+			var getState : js.Function0[ TestTenantsState ] = js.native
+			var modState : js.Function1[ TestTenantsState => TestTenantsState, Unit ] = js.native
 		}
 
+		def injectContext( getter : () => TestTenantsState, setter : ( TestTenantsState => TestTenantsState ) => Unit ) : Unit = {
+			val hook = ( new js.Object ).asInstanceOf[ TestTenantsHook.TestTenantsHook ]
+			hook.modState = setter
+			hook.getState = getter
+
+			val injectionSite = document.querySelectorAll( s"#$eleId" ).vector.headOption  match {
+				case Some( node ) => node.asInstanceOf[ js.Dynamic ]
+				case None =>
+					val ele = document.createElement( "div" )
+					ele.setAttribute( "id", eleId );
+					ele
+			}
+
+			injectionSite.asInstanceOf[ js.Dynamic ].contextHook = hook
+		}
+
+		def getState : TestTenantsState =
+			document.querySelector( s"#$eleId" )
+			  .asInstanceOf[ js.Dynamic ]
+			  .contextHook
+			  .asInstanceOf[ TestTenantsHook ]
+			  .getState()
+
+		def modState( mod : TestTenantsState => TestTenantsState ) : Unit =
+			document.querySelector( s"#$eleId" )
+			  .asInstanceOf[ js.Dynamic ]
+			  .contextHook
+			  .asInstanceOf[ TestTenantsHook ]
+			  .modState( mod )
+
 		case class TestTenantsState(
-			tenants : Seq[ DartTenant ]
+			tenants : Seq[ DartTenant ] = Nil,
+			displayedTenants : Seq[ DartTenant ] = Nil,
 		)
 	}
 
@@ -36,16 +75,25 @@ trait InMemoryDartTenantsContextDI
 
 
 		class Backend( scope : BackendScope[ DartTenantsContext.Props, TestTenantsState ] ) {
-			def refresh : Callback = scope.modState( _.copy( tenants = TestTenantsService.tenants ) )
+			def injectContext() : Unit =
+				TestTenantsHook.injectContext(
+					() => scope.state.runNow(),
+					( modder : TestTenantsState => TestTenantsState ) => scope.modState( modder ).runNow() )
+
+			def refresh : Callback = scope.modState( st => st.copy( displayedTenants = st.tenants ) )
 
 			def render( props : DartTenantsContext.Props, state: TestTenantsState ) : VdomNode = {
-				props.render( state.tenants, refresh )
+				props.render( state.displayedTenants, refresh )
 			}
 		}
 
 		val component = ScalaComponent.builder[ DartTenantsContext.Props ]
-		  .initialState( TestTenantsState( TestTenantsService.tenants ) )
-		  .backend( new Backend( _ ) )
+		  .initialState( TestTenantsState() )
+		  .backend( scope => {
+			  val be = new Backend( scope )
+			  be.refresh
+			  be
+		  } )
 		  .renderBackend
 		  .build
 
