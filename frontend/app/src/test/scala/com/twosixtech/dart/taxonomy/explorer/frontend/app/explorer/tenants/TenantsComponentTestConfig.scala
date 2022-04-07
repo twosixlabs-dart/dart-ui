@@ -1,6 +1,8 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.tenants
 
 import com.twosixlabs.dart.auth.tenant.DartTenant
+import com.twosixtech.dart.scalajs.backend.HttpBody.NoBody
+import com.twosixtech.dart.scalajs.backend.{ HttpBody, HttpMethod, HttpRequest, HttpResponse }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.context.InMemoryDartTenantsContextDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.dart.component.test.DartComponentTestStateConfiguration
 import japgolly.scalajs.react.vdom.VdomElement
@@ -77,4 +79,23 @@ trait TenantsComponentTestConfig
     def clearMockedTenants() : dsl.Actions = dsl.action( s"Clear mocked tenants" )( v => Future( v.obs.clearMockedTenants() ) )
     def refreshTenants() : dsl.Actions = dsl.action( "Refresh tenants" )( v => Future( v.obs.refresh() ) )
     def refreshContextTenants() : dsl.Actions = dsl.action( "Refresh tenants via DartContext" )( v => Future( v.obs.refreshContextTenants() ) )
+
+    private val tenantUrlString = s"${dartConfig.tenantsBaseUrl}/(.+)"
+    private val TenantUrlPattern = tenantUrlString.r
+
+    // Backend handler
+    def setBackendAction : dsl.Actions = setBackendResponse(
+        _.setHandler { ( method, request ) =>
+            (method, request) match {
+                case (HttpMethod.Post, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
+                    TestTenantsHook.TestTenantsService.addTenant( tenantId )
+                    HttpResponse( Map.empty[ String, String ], 201, NoBody )
+                case (HttpMethod.Delete, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
+                    TestTenantsHook.TestTenantsService.removeTenant( tenantId )
+                    HttpResponse( Map.empty[ String, String ], 200, NoBody )
+                case (m, r) =>
+                    throw new Exception( s"Unexpected request: method: $m, response: $r" )
+            }
+        }
+    )
 }

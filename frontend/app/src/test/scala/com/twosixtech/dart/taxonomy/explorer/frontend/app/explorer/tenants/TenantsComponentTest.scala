@@ -68,8 +68,9 @@ trait TenantsComponentTest
         test( "Adding Tenants" ) {
             test( "should add a tenant" ) {
                 Plan.action(
-                    clearMockedTenants()
-                      >> refreshContextTenants()
+                    setBackendAction
+                    >> clearMockedTenants()
+                    >> refreshContextTenants()
                       +> currentTenants.assert.equal()
                     >> addTenant( "test-tenant" )
                       +> currentTenants.assert.equal( "test-tenant" )
@@ -78,12 +79,13 @@ trait TenantsComponentTest
 
             test( "should add multiple tenants" ) {
                 Plan.action(
-                    clearMockedTenants()
-                      >> refreshContextTenants()
+                    setBackendAction
+                    >> clearMockedTenants()
+                    >> refreshContextTenants()
                       +> currentTenants.assert.equal()
-                      >> addTenant( "t1" )
-                      >> addTenant( "t2" )
-                      >> addTenant( "t3" )
+                    >> addTenant( "t1" )
+                    >> addTenant( "t2" )
+                    >> addTenant( "t3" )
                       +> currentTenants.assert.equalIgnoringOrder( "t1", "t2", "t3" )
                 ).run().map( _.assert() )
             }
@@ -92,9 +94,10 @@ trait TenantsComponentTest
         test( "Removing Tenants" ) {
             test( "should remove a tenant" ) {
                 Plan.action(
-                    clearMockedTenants()
-                      >> addMockedTenant( "test-tenant" )
-                      >> refreshContextTenants()
+                    setBackendAction
+                    >> clearMockedTenants()
+                    >> addMockedTenant( "test-tenant" )
+                    >> refreshContextTenants()
                       +> currentTenants.assert.equal( "test-tenant" )
                     >> removeTenant( "test-tenant" )
                       +> currentTenants.assert.equal()
@@ -103,22 +106,24 @@ trait TenantsComponentTest
 
             test( "should remove multiple tenants" ) {
                 Plan.action(
-                    clearMockedTenants()
-                      >> addMockedTenant( "test-tenant" )
-                      >> refreshContextTenants()
+                    setBackendAction
+                    >> clearMockedTenants()
+                    >> addMockedTenant( "test-tenant" )
+                    >> refreshContextTenants()
                       +> currentTenants.assert.equal( "test-tenant" )
-                      >> removeTenant( "test-tenant" )
+                    >> removeTenant( "test-tenant" )
                       +> currentTenants.assert.equal()
                 ).run().map( _.assert() )
             }
 
             test( "should not be able to remove global tenant" ) {
                 Plan.action(
-                    clearMockedTenants()
-                      >> addMockedTenant( DartTenant.globalId )
-                      >> refreshContextTenants()
+                    setBackendAction
+                    >> clearMockedTenants()
+                    >> addMockedTenant( DartTenant.globalId )
+                    >> refreshContextTenants()
                       +> currentTenants.assert.equal( DartTenant.globalId )
-                      >> removeTenant( DartTenant.globalId )
+                    >> removeTenant( DartTenant.globalId )
                       +> currentTenants.assert.equal( DartTenant.globalId )
                 ).run().map( _.assert() )
             }
