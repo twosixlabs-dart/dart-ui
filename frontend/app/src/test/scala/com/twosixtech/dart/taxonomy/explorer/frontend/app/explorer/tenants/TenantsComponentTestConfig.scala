@@ -31,16 +31,20 @@ trait TenantsComponentTestConfig
     abstract class ObsType( ele : HTMLElement )
       extends TestHookObserver( ele ) {
 
+        import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.ContextHook.HookedNode
+
+        def getTenantsHook : TestTenantsHook.TestTenantsHook = ele.retrieveContext[ TestTenantsHook.TestTenantsHook ]( Some( TestTenantsHook.hookId ) )
+
         // Read state
         def getContextTenants : Seq[ DartTenant ] = getDartContext().tenants
         def contextTenantExists( tenant : DartTenant ) : Boolean = getContextTenants.contains( tenant )
-        def getMockedTenants : Seq[ DartTenant ] = TestTenantsHook.getState.tenants
+        def getMockedTenants : Seq[ DartTenant ] = getTenantsHook.getState().tenants
         def mockedTenantExists( tenant : DartTenant ) : Boolean = getMockedTenants.contains( tenant )
 
         // Update state
-        def addMockedTenant( tenant : String ) : Unit = TestTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenant ) +: v.tenants ) )
-        def removeMockedTenant( tenant : String ) : Unit = TestTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenant ) ) ) )
-        def clearMockedTenants() : Unit = TestTenantsHook.modState( v => v.copy( tenants = Nil ) )
+        def addMockedTenant( tenant : String ) : Unit = getTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenant ) +: v.tenants ) )
+        def removeMockedTenant( tenant : String ) : Unit = getTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenant ) ) ) )
+        def clearMockedTenants() : Unit = getTenantsHook.modState( v => v.copy( tenants = Nil ) )
         def refreshContextTenants() : Unit = getDartContext().refreshTenants.runNow()
 
         // Read methods
@@ -51,6 +55,22 @@ trait TenantsComponentTestConfig
         def addTenant( tenant : String ) : Unit
         def removeTenant( tenant : String ) : Unit
         def refresh() : Unit
+
+        def setTenantsBackendHandler() : Unit = {
+            val hook = getTenantsHook
+            getDartContext().backendContext.mockContext.setHandler { ( method, request ) =>
+                (method, request) match {
+                    case (HttpMethod.Post, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
+                        hook.modState( v => v.copy( tenants = DartTenant.fromString( tenantId ) +: v.tenants ) )
+                        HttpResponse( Map.empty[ String, String ], 201, NoBody )
+                    case (HttpMethod.Delete, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
+                        hook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenantId ) ) ) )
+                        HttpResponse( Map.empty[ String, String ], 200, NoBody )
+                    case (m, r) =>
+                        throw new Exception( s"Unexpected request: method: $m, response: $r" )
+                }
+            }
+        }
     }
 
     override type Obs <: ObsType
@@ -82,18 +102,5 @@ trait TenantsComponentTestConfig
     private val TenantUrlPattern = tenantUrlString.r
 
     // Backend handler
-    def setBackendAction : dsl.Actions = setBackendResponse(
-        _.setHandler { ( method, request ) =>
-            (method, request) match {
-                case (HttpMethod.Post, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
-                    TestTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenantId ) +: v.tenants ) )
-                    HttpResponse( Map.empty[ String, String ], 201, NoBody )
-                case (HttpMethod.Delete, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
-                    TestTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenantId ) ) ) )
-                    HttpResponse( Map.empty[ String, String ], 200, NoBody )
-                case (m, r) =>
-                    throw new Exception( s"Unexpected request: method: $m, response: $r" )
-            }
-        }
-    )
+    def setBackendAction( ) : dsl.Actions = dsl.action( s"Set backend handler" )( v => Future( v.obs.setTenantsBackendHandler() ) )
 }

@@ -16,11 +16,11 @@ trait ContextHook extends js.Object {
 
 object ContextHook {
 
-    val className : String = s"test-context-hook"
+    val defaultId : String = s"test-context-hook"
 
     implicit class HookedNode( outerElement : html.Element ) {
-        def injectContext[ T ]( context : T ) : Unit = {
-            val injectionSite = outerElement.querySelectorAll( s".$className" )
+        def injectContext[ T ]( context : T, id : Option[ String ] = None ) : Unit = {
+            val injectionSite = outerElement.querySelectorAll( s".${id.getOrElse( defaultId )}" )
               .vector
               .headOption match {
                 case None =>
@@ -31,8 +31,8 @@ object ContextHook {
             injectionSite.asInstanceOf[ js.Dynamic ].contextHook = apply( context )
         }
 
-        def retrieveContext[ T ] : T = {
-            val injectionSite = outerElement.querySelectorAll( s".$className" )
+        def retrieveContext[ T ]( id : Option[ String ] = None ) : T = {
+            val injectionSite = outerElement.querySelectorAll( s".${id.getOrElse( defaultId )}" )
               .vector
               .headOption match {
                 case None =>
@@ -44,7 +44,7 @@ object ContextHook {
         }
 
         def cleanupContext() : Unit = {
-            val injectionSite = outerElement.querySelectorAll( s".$className" )
+            val injectionSite = outerElement.querySelectorAll( s".$defaultId" )
               .vector
               .headOption match {
                 case None =>
@@ -62,31 +62,31 @@ object ContextHook {
         tch
     }
 
-    class ComponentBackend[ T ]( scope : BackendScope[ (T, VdomElement), Unit ] ) {
+    class ComponentBackend[ T ]( scope : BackendScope[ (T, VdomNode), Unit ], id : Option[ String ] ) {
         val ref = Ref[ html.Element ]
 
-        def render( props : (T, VdomElement) ): VdomElement = {
+        def render( props : (T, VdomNode) ): VdomNode = {
             val (_, children) = props
             <.div(
                 <.div(
-                    ^.className := ContextHook.className,
+                    ^.className := id.getOrElse( ContextHook.defaultId ),
                 ),
                 children
             ).withRef( ref )
         }
     }
 
-    def Component[ T ] = ScalaComponent.builder[ (T, VdomElement) ]
+    def Component[ T ]( id : Option[ String ] = None ) = ScalaComponent.builder[ (T, VdomNode) ]
       .initialState()
-      .backend( new ComponentBackend[ T ]( _ ) )
+      .backend( scope => new ComponentBackend[ T ]( scope, id ) )
       .renderBackend
       .componentDidMount( cdm => {
           val (dartContext, _) = cdm.props
-          cdm.backend.ref.foreach( _.injectContext( dartContext ) )
+          cdm.backend.ref.foreach( _.injectContext( dartContext, id ) )
       } )
       .componentDidUpdate( cdu => {
           val (dartContext, _) = cdu.currentProps
-          cdu.backend.ref.foreach( _.injectContext( dartContext ) )
+          cdu.backend.ref.foreach( _.injectContext( dartContext, id ) )
       } )
       .build
 }
