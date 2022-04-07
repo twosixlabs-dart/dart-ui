@@ -14,11 +14,15 @@ import scala.scalajs.js
 
 import com.twosixtech.dart.scalajs.dom.DomUtils.NodeListExtensions
 
+case class TestTenantsState(
+	tenants : Seq[ DartTenant ] = Nil,
+	displayedTenants : Seq[ DartTenant ] = Nil,
+)
 
 @js.native
 trait TestTenantsJsHook extends js.Object {
-	var getState : js.Any = js.native
-	var modState : js.Any = js.native
+	var getState : js.Function0[ TestTenantsState ] = js.native
+	var modState : js.Function1[ TestTenantsState => TestTenantsState, Unit ] = js.native
 }
 
 
@@ -50,22 +54,15 @@ trait InMemoryDartTenantsContextDI
 			  .asInstanceOf[ js.Dynamic ]
 			  .contextHook
 			  .asInstanceOf[ TestTenantsJsHook ]
-			  .getState.asInstanceOf[ () => TestTenantsState ]()
+			  .getState()
 
 		def modState( mod : TestTenantsState => TestTenantsState ) : Unit =
 			document.querySelector( s"#$eleId" )
 			  .asInstanceOf[ js.Dynamic ]
 			  .contextHook
 			  .asInstanceOf[ TestTenantsJsHook ]
-			  .modState.asInstanceOf[ ( TestTenantsState => TestTenantsState ) => Unit ]( mod )
-
-		case class TestTenantsState(
-			tenants : Seq[ DartTenant ] = Nil,
-			displayedTenants : Seq[ DartTenant ] = Nil,
-		)
+			  .modState( mod )
 	}
-
-	import TestTenantsHook._
 
 	override type DartTenantsContextState = TestTenantsState
 
