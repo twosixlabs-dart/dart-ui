@@ -14,7 +14,8 @@ trait TenantsComponentTest
     override def tests : Tests = Tests {
         test( "Check integration between mocking and DartContext" ) {
             Plan.action(
-                dsl.emptyAction
+                clearMockedTenants()
+                >> refreshContextTenants()
                   +> mockedTenants.assert.equal()
                   +> contextTenants.assert.equal()
                 >> addMockedTenant( "test-tenant" )
