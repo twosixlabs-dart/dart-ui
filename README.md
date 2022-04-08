@@ -175,3 +175,25 @@ Also note that the `app.config.js` webpack config used by `scala-js-bundler`
 needs to include aliases for `@material-ui/core` and `@material-ui/style` so
 that only one instance of each component and styles object is used in the
 application.
+
+## Ontology Utilities
+
+In addition to the web application, this project also builds a few standalone utilities for 
+processing WM ontology files.
+
+### Translate Backwards
+
+To translate a World Modelers ontology from its newest format to the older format, 
+you can run the following sbt command:
+
+```bash
+sbt utilities/run translate-back -i [new-version-ontology] -o [output-filename]
+```
+
+You can also run the command via a publicly accessible docker image:
+
+```bash
+docker run -it -e PROGRAM_ARGS="translate-back -i /opt/ont/[new-version-ontology] -o /opt/ont/[output-filename]" \
+          -v [path-to-input-and-output]:/opt/ont \
+          twosixlabsdart/ontology-utils
+```
