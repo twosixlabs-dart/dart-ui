@@ -1,10 +1,10 @@
 package com.twosixtech.dart.scalajs.react
 
-import japgolly.scalajs.react.component.Scala.{ Component, Unmounted }
+import japgolly.scalajs.react.component.Scala.{ BackendScope, Component, Unmounted }
 import japgolly.scalajs.react.component.builder.Lifecycle
 import japgolly.scalajs.react.internal.Box
 import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
-import japgolly.scalajs.react.{ BackendScope, Callback, CallbackTo, Children, CtorType, ScalaComponent, UpdateSnapshot }
+import japgolly.scalajs.react.{ Callback, CallbackTo, Children, CtorType, ScalaComponent, UpdateSnapshot }
 
 trait ReactComponent[ PropsType, StateType ] {
     type BackendType

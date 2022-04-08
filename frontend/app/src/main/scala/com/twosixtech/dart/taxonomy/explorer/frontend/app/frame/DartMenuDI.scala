@@ -32,26 +32,22 @@ trait DartMenuDI {
                     DartMenu.MenuItem(
                         "Document Upload",
                         context.route( DartRouter.ForkliftRoute ),
-                        isSelected = props.appChoice match {
-                            case DartFrame.Forklift => true
-                            case _ => false
-                        }
+                        isSelected = props.appChoice == DartFrame.Forklift
                     ),
                     DartMenu.MenuItem(
                         "Corpus Exploration",
                         context.route( DartRouter.CorpexRoute ),
-                        isSelected = props.appChoice match {
-                            case DartFrame.Corpex => true
-                            case _ => false
-                        }
+                        isSelected = props.appChoice == DartFrame.Corpex
                     ),
                     DartMenu.MenuItem(
                         "Concepts Explorer",
                         context.route( DartRouter.ConceptExplorerRoute ),
-                        isSelected = props.appChoice match {
-                            case DartFrame.ConceptExplorer => true
-                            case _ => false
-                        }
+                        isSelected = props.appChoice == DartFrame.ConceptExplorer,
+                    ),
+                    DartMenu.MenuItem(
+                        "Manage Tenants",
+                        context.route( DartRouter.TenantsRoute ),
+                        isSelected = props.appChoice == DartFrame.Tenants,
                     ),
                 )
             ).toDartProps )

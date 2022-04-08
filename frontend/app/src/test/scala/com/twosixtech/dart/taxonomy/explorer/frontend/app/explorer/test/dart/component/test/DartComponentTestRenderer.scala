@@ -21,7 +21,9 @@ trait DartComponentTestRenderer extends TestApp.AppStack {
         }
     }
 
-    private val DartContextHookComponent = ContextHook.Component[ DartContext ]
+    val contextHookId : String = "DART-CONTEXT-TEST-HOOK"
+
+    private val DartContextHookComponent = ContextHook.Component[ DartContext ]( Some( contextHookId ) )
 
     private case class InnerContext(
         dartContext : DartContext,

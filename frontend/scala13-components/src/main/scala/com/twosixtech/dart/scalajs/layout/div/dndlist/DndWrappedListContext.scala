@@ -1,11 +1,11 @@
 package com.twosixtech.dart.scalajs.layout.div.dndlist
 
-import com.twosixtech.dart.scalajs.layout.div.dndlist.utils.{IdUtils, ListUtils}
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.component.Scala.Unmounted
+import com.twosixtech.dart.scalajs.layout.div.dndlist.utils.{ IdUtils, ListUtils }
+import japgolly.scalajs.react.component.Scala.{ BackendScope, Unmounted }
 import japgolly.scalajs.react.raw.React.Element
 import japgolly.scalajs.react.vdom.html_<^._
-import react.beautifuldnd.{DragDropContext, DropResult, ResponderProvided}
+import react.beautifuldnd.{ DragDropContext, DropResult, ResponderProvided }
+import japgolly.scalajs.react.{ Callback, ScalaComponent }
 
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._

@@ -82,6 +82,12 @@ object MockBackendClientComponent {
         ) : Future[ HttpResponse ] = {
             import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+//            println( "SENDING REQUEST TO MOCK CLIENT" )
+//            println( "==============================" )
+//            println( s"method: $method" )
+//            println( s"request: $request" )
+//            println( s"mock type: $mock" )
+
             mock match {
                 case BackendMocks.NoResponse( onRequest ) =>
                     onRequest( method, request )

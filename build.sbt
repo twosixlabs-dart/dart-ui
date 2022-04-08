@@ -7,6 +7,8 @@ import scalajsbundler.util.JSON
 
 import scala.language.postfixOps
 
+import org.scalajs.jsenv.nodejs.NodeJSEnv
+
 /*
    ##############################################################################################
    ##                                                                                          ##
@@ -453,20 +455,53 @@ assembleApp := ( DevConfig / assembleApp ).value
 
 
 // Compile and run application
-val runApp = taskKey[ Unit ]( "Compile and run application" )
+val runAppFull = taskKey[ Unit ]( "Compile and run all parts of the application application" )
 
-ProdConfig / runApp := Def.sequential(
+ProdConfig / runAppFull := Def.sequential(
 	( ProdConfig / compileConf ),
 	( scala13Components / Compile / fullLinkJS ),
 	( prepareJs ),
 	( app / Compile / fullOptJS / webpack ),
 	( server / Compile / run ).toTask( " -i" ),
 ).value
-DevConfig / runApp := Def.sequential(
+DevConfig / runAppFull := Def.sequential(
 	( DevConfig / compileConf ),
 	( scala13Components / Compile / fullLinkJS ),
 	( prepareJs ),
 	( app / Compile / fastOptJS / webpack ),
 	( server / Compile / run ).toTask( " -i" ),
 ).value
-runApp := ( DevConfig / runApp ).value
+runAppFull := ( DevConfig / runAppFull ).value
+
+// Compile and run main application
+val runAppMain = taskKey[ Unit ]( "Run app, but only build main scalajs part" )
+
+ProdConfig / runAppMain := Def.sequential(
+	( app / Compile / fullOptJS / webpack ),
+	( server / Compile / run ).toTask( " -i" ),
+).value
+DevConfig / runAppMain := Def.sequential(
+	( ProdConfig / compileConf ),
+	( app / Compile / fastOptJS / webpack ),
+	( server / Compile / run ).toTask( " -i" ),
+).value
+runAppMain := ( DevConfig / runAppMain ).value
+
+// Compile and run application
+val runAppJs = taskKey[ Unit ]( "Compile and run all parts of the application application" )
+
+ProdConfig / runAppJs := Def.sequential(
+	( ProdConfig / compileConf ),
+	( prepareJs ),
+	( app / Compile / fullOptJS / webpack ),
+	( server / Compile / run ).toTask( " -i" ),
+).value
+DevConfig / runAppJs := Def.sequential(
+	( DevConfig / compileConf ),
+	( prepareJs ),
+	( app / Compile / fastOptJS / webpack ),
+	( server / Compile / run ).toTask( " -i" ),
+).value
+runAppJs := ( DevConfig / runAppJs ).value
+
+

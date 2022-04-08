@@ -18,6 +18,8 @@ trait DartRouterDI extends DartRouterDeps {
 
         case class DocumentRoute( id : String ) extends DartRoute
 
+        case object TenantsRoute extends DartRoute
+
         case object TestRoute extends DartRoute
 
         case object NotFoundRoute extends DartRoute
@@ -40,11 +42,13 @@ trait DartRouterDI extends DartRouterDeps {
 
                 val forkliftRoute = staticRoute( root / "forklift", ForkliftRoute ) ~> renderR( _ => <.div() )
 
+                val tenantRoute = staticRoute( root / "tenants", TenantsRoute ) ~> renderR( _ => <.div() )
+
                 val testRoute = staticRoute( root / "test", TestRoute ) ~> {
                     renderR( _ => <.div() )
                 }
 
-                ( conceptRoute | documentRoute | corpexRoute | forkliftRoute | testRoute )
+                ( conceptRoute | documentRoute | corpexRoute | forkliftRoute | tenantRoute | testRoute )
                   .notFound( redirectToPage( CorpexRoute )( SetRouteVia.HistoryPush ) )
                   .renderWithP( ( rCtl : RouterCtl[ DartRoute ], rWp : ResolutionWithProps[ DartRoute, Context => VdomNode ] ) => {
                       ( renderer : Context => VdomNode ) => {

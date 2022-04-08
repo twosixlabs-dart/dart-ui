@@ -22,15 +22,17 @@ trait GenericDartRootDI
 
             props match {
                 case DartRouter.ConceptExplorerRoute =>
-                    dartFrame( DartFrame.Props( DartFrame.ConceptExplorer ).toDartPropsRC( () ) )
+                    dartFrame( DartFrame.Props( DartFrame.ConceptExplorer ).toDartProps )
                 case DartRouter.CorpexRoute =>
-                    dartFrame( DartFrame.Props( DartFrame.Corpex ).toDartPropsRC( () ) )
+                    dartFrame( DartFrame.Props( DartFrame.Corpex ).toDartProps )
                 case DartRouter.DocumentRoute( id ) =>
-                    dartFrame( DartFrame.Props( DartFrame.CorpexDocument( id ) ).toDartPropsRC( () ) )
+                    dartFrame( DartFrame.Props( DartFrame.CorpexDocument( id ) ).toDartProps )
                 case DartRouter.ForkliftRoute =>
-                    dartFrame( DartFrame.Props( DartFrame.Forklift ).toDartPropsRC( () ) )
+                    dartFrame( DartFrame.Props( DartFrame.Forklift ).toDartProps )
+                case DartRouter.TenantsRoute =>
+                    dartFrame( DartFrame.Props( DartFrame.Tenants ).toDartProps )
                 case DartRouter.TestRoute =>
-                    dartFrame( DartFrame.Props( DartFrame.Test ).toDartPropsRC( () ) )
+                    dartFrame( DartFrame.Props( DartFrame.Test ).toDartProps )
                 case DartRouter.NotFoundRoute =>
                     <.div( "NOT FOUND" )
             }
