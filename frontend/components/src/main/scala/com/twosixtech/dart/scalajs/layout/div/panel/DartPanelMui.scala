@@ -27,7 +27,7 @@ object DartPanelMui extends DartPanel[ Unit ] {
           paperProps.component = "div"
           paperProps.classes = {
               val pc = ( new js.Object ).asInstanceOf[ MuiPaper.JsClasses ]
-              pc.root = Styles.fullHeight.htmlClass
+              pc.root = if ( props.fullHeight ) Styles.fullHeight.htmlClass else ""
               props.classes.root.foreach( pc.root += " " + _ )
               pc
           }

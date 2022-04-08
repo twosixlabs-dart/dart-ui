@@ -71,7 +71,12 @@ trait DartTenantsDI {
 			}
 
 			dartTenantsLayout( DartTenants.LayoutProps(
-				context.tenants map {
+				context.tenants sortWith {
+					case (GlobalCorpus, _) => true
+					case (_, GlobalCorpus) => false
+					case (CorpusTenant( id1, _ ), CorpusTenant( id2, _ )) =>
+						id1 < id2
+				} map {
 					case GlobalCorpus => DartTenant.globalId
 					case CorpusTenant( id, _ ) => id
 				},

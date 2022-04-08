@@ -8,7 +8,9 @@ trait DartPanel[ State ] extends ReactComponent[ DartPanel.Props, State ] {
     def apply(
         element : VdomNode,
         classes : DartPanel.Classes = DartPanel.Classes(),
-    ) : Unmounted[ DartPanel.Props, State, BackendType ] = apply( DartPanel.Props( element, classes ) )
+        fullHeight : Boolean = true,
+    ) : Unmounted[ DartPanel.Props, State, BackendType ] =
+        apply( DartPanel.Props( element, classes, fullHeight ) )
 }
 
 object DartPanel {
@@ -20,6 +22,7 @@ object DartPanel {
     case class Props(
         element : VdomNode,
         classes : Classes = Classes(),
+        fullHeight : Boolean = true,
     )
 
 }
