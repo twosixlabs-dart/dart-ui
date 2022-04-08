@@ -19,7 +19,7 @@ trait DartComponentTestStateConfiguration
         import ContextHook.HookedNode
 
         def getDartContext( ) : DartContext = {
-            ele.retrieveContext[ ContextHook ]( Some( contextHookId ) )
+            ele.retrieveHook( Some( contextHookId ) )
               .getContext()
               .asInstanceOf[ DartContext ]
         }
@@ -28,6 +28,10 @@ trait DartComponentTestStateConfiguration
         def setBackendResponse( setter : MockBackendContext => Callback ) : Unit = {
             setter( getDartContext().backendContext.mockContext ).runNow()
         }
+
+        def getHtml : String = ele.innerHTML
+
+        def printHtml() : Unit = println( getHtml )
 
     }
 
@@ -45,7 +49,11 @@ trait DartComponentTestStateConfiguration
 
     type PlanMagnet = Either[ dsl.Plan, dsl.PlanWithInitialState ]
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    import scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+    // General focus
+    def html : dsl.FocusValue[ String ] = dsl.focus( "HTML" ).value( _.obs.getHtml )
+    def printHtml : dsl.Actions = dsl.action( "Log HTML" )( v => Future( v.obs.printHtml() ) )
 
     // Actions using context hook
     def dispatch( action : DartAction ) : dsl.Actions =

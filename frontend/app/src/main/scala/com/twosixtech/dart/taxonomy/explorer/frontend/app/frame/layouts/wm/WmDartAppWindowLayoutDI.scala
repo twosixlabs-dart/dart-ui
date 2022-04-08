@@ -1,16 +1,18 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.layouts.wm
 
-import com.twosixtech.dart.scalajs.layout.menu.tabs.{DartTabs, DartTabsTranslation}
+import com.twosixtech.dart.scalajs.layout.menu.tabs.{ DartTabs, DartTabsTranslation }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.DartClusterCuratorFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.layouts.wm.WmDartClusterCuratorFrameLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.frame.DartConceptExplorerFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.frame.layouts.wm.WmDartConceptExplorerFrameLayoutDI
-import com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.{DartAppWindowDI, DartAppWindowLayoutDeps, DartFrameDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.{ DartAppWindowDI, DartAppWindowLayoutDeps, DartFrameDI }
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.DartTenantsDI
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.layouts.GenericDartTenantsLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
 import japgolly.scalajs.react.CtorType.Props
-import japgolly.scalajs.react.component.Js.{RawMounted, UnmountedWithRawType}
-import japgolly.scalajs.react.{Children, JsComponent}
+import japgolly.scalajs.react.component.Js.{ RawMounted, UnmountedWithRawType }
+import japgolly.scalajs.react.{ Children, JsComponent }
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -53,7 +55,8 @@ object ForkliftUI {
     lazy val component = cmp( new js.Object )
 }
 
-trait WmDartAppWindowLayoutDI extends DartAppWindowLayoutDeps {
+trait WmDartAppWindowLayoutDI
+  extends DartAppWindowLayoutDeps {
     this : DartFrameDI
       with DartAppWindowDI
       with DartContextDeps
@@ -61,7 +64,9 @@ trait WmDartAppWindowLayoutDI extends DartAppWindowLayoutDeps {
       with DartClusterCuratorFrameDI
       with WmDartClusterCuratorFrameLayoutDI
       with DartConceptExplorerFrameDI
-      with WmDartConceptExplorerFrameLayoutDI =>
+      with WmDartConceptExplorerFrameLayoutDI
+      with DartTenantsDI
+      with GenericDartTenantsLayoutDI =>
 
     override type DartAppWindowLayoutState = DartAppWindowLayoutBasic.ConceptExplorerView
     // render context is fixed to null at interface so that it is easy to mix
@@ -82,12 +87,13 @@ trait WmDartAppWindowLayoutDI extends DartAppWindowLayoutDeps {
                 case DartFrame.Corpex => CorpexUI.search
                 case DartFrame.CorpexDocument( id ) => CorpexUI.document( id )
                 case DartFrame.Forklift => ForkliftUI.component
+                case DartFrame.Tenants => dartTenants( DartTenants.Props().toDartProps )
                 case DartFrame.ConceptExplorer =>
                     val app = conceptView match {
                         case TaxonomyView =>
                             dartConceptExplorerFrame( DartConceptExplorerFrame.Props().toDartProps )
                         case ClusterView =>
-                            dartClusterCuratorFrame( DartClusterCuratorFrame.Props().toDartPropsRC( () ) )
+                            dartClusterCuratorFrame( DartClusterCuratorFrame.Props().toDartProps )
                     }
 
                     <.div(

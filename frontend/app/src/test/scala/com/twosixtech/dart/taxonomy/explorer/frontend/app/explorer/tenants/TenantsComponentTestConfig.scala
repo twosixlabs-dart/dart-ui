@@ -6,10 +6,11 @@ import com.twosixtech.dart.scalajs.backend.{ HttpBody, HttpMethod, HttpRequest, 
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.base.context.InMemoryDartTenantsContextDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.dart.component.test.DartComponentTestStateConfiguration
 import japgolly.scalajs.react.vdom.VdomElement
+import org.scalajs.dom.console
 import org.scalajs.dom.raw.HTMLElement
 import teststate.Exports._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 
 
@@ -20,7 +21,7 @@ trait TenantsComponentTestConfig
     val testRenderContext : TenantOntologyComponentRenderContext
 
     override def defaultRenderer( implicit context : DartContext ) : VdomElement = {
-        tenantOntologyComponent( TenantOntologyComponent.Props().toDartPropsRC( testRenderContext ) )
+        dartTenants( DartTenants.Props().toDartPropsRC( testRenderContext ) )
     }
 
     case class TOContents(
@@ -33,19 +34,42 @@ trait TenantsComponentTestConfig
 
         import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.test.ContextHook.HookedNode
 
-        def getTenantsHook : TestTenantsHook.TestTenantsHook = ele.retrieveContext[ TestTenantsHook.TestTenantsHook ]( Some( TestTenantsHook.hookId ) )
+        def getTenantsHook : TestTenantsHook.Hook = {
+            val ctx = ele.retrieveHook( Some( TestTenantsHook.hookId ) )
+              .getContext().asInstanceOf[ TestTenantsHook.Hook ]
+//            print( ctx.toString )
+            ctx
+        }
 
         // Read state
-        def getContextTenants : Seq[ DartTenant ] = getDartContext().tenants
+        def getContextTenants : Seq[ DartTenant ] = {
+            val tenants = getDartContext().tenants
+//            println( "DART CONTEXT TENANTS" )
+//            println( "====================" )
+//            println( tenants.mkString( ", " ) )
+            tenants
+        }
         def contextTenantExists( tenant : DartTenant ) : Boolean = getContextTenants.contains( tenant )
-        def getMockedTenants : Seq[ DartTenant ] = getTenantsHook.getState().tenants
+        def getMockedTenants : Seq[ DartTenant ] = {
+            val state = getTenantsHook.getState()
+//            println( "MOCKED TENANTS STATE" )
+//            println( "====================" )
+//            println( state )
+            state.tenants
+        }
         def mockedTenantExists( tenant : DartTenant ) : Boolean = getMockedTenants.contains( tenant )
 
         // Update state
         def addMockedTenant( tenant : String ) : Unit = getTenantsHook.modState( v => v.copy( tenants = DartTenant.fromString( tenant ) +: v.tenants ) )
         def removeMockedTenant( tenant : String ) : Unit = getTenantsHook.modState( v => v.copy( tenants = v.tenants.filter( _ != DartTenant.fromString( tenant ) ) ) )
         def clearMockedTenants() : Unit = getTenantsHook.modState( v => v.copy( tenants = Nil ) )
-        def refreshContextTenants() : Unit = getDartContext().refreshTenants.runNow()
+        def refreshContextTenants() : Unit = {
+            val ctx = getDartContext()
+//            println( "DART CONTEXT" )
+//            println( "============" )
+//            println( ctx )
+            ctx.refreshTenants.runNow()
+        }
 
         // Read methods
         def getTenants : Seq[ String ]
@@ -58,8 +82,12 @@ trait TenantsComponentTestConfig
 
         def setTenantsBackendHandler() : Unit = {
             val hook = getTenantsHook
-            getDartContext().backendContext.mockContext.setHandler { ( method, request ) =>
-                (method, request) match {
+            val setter = getDartContext().backendContext.mockContext.setHandler { ( method, request ) =>
+//                println( "BACKEND REQUEST" )
+//                println( "===============" )
+//                println( s"method: $method" )
+//                println( s"request: $request" )
+                val res = (method, request) match {
                     case (HttpMethod.Post, HttpRequest( TenantUrlPattern( tenantId ), _, HttpBody.NoBody )) =>
                         hook.modState( v => v.copy( tenants = DartTenant.fromString( tenantId ) +: v.tenants ) )
                         HttpResponse( Map.empty[ String, String ], 201, NoBody )
@@ -69,7 +97,10 @@ trait TenantsComponentTestConfig
                     case (m, r) =>
                         throw new Exception( s"Unexpected request: method: $m, response: $r" )
                 }
+//                println( s"mocked response: $res" )
+                res
             }
+            setter.runNow()
         }
     }
 

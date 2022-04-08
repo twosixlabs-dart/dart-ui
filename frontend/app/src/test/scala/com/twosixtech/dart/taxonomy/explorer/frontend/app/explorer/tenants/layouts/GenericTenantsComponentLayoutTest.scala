@@ -2,14 +2,15 @@ package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.tenants.layo
 
 import com.twosixtech.dart.scalajs.dom.DomUtils.NodeListExtensions
 import com.twosixtech.dart.scalajs.layout.form.select.{ Select, SelectBasic }
-import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.state.access.layouts.GenericStateAccessComponentLayoutClasses.newKeyInputClass
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.tenants.TenantsComponentTest
 import japgolly.scalajs.react.test.SimEvent
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement }
 import teststate.dsl.Dsl
+import teststate.Exports._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
+import scala.util.Try
 
 
 object GenericTenantsComponentLayoutTest
@@ -30,14 +31,26 @@ trait GenericTenantsComponentLayoutTest
         def tenantEle( tenant : String ) : Option[ HTMLElement ] = {
             ele.querySelectorAll( s".$tenantClass" )
               .vector
-              .find( _.textContent.trim == tenant )
+              .find { ( node ) =>
+                  Try(
+                      node.asInstanceOf[ HTMLElement]
+                        .querySelector( s".$tenantNameClass" )
+                        .textContent
+                        .trim
+                  ).toOption.contains( tenant )
+              }
               .map( _.asInstanceOf[ HTMLElement ] )
         }
 
-        override def getTenants : Seq[ String ] =
+        override def getTenants : Seq[ String ] = {
             ele.querySelectorAll( s".$tenantClass" )
               .vector
-              .map( _.textContent )
+              .map(
+                  _.asInstanceOf[ HTMLElement]
+                    .querySelector( s".$tenantNameClass" )
+                    .textContent
+              )
+        }
 
         override def tenantExists( tenantId : String ) : Boolean =
             ele.querySelectorAll( s".$tenantClass" )
@@ -45,15 +58,23 @@ trait GenericTenantsComponentLayoutTest
               .exists( _.textContent.trim == tenantId )
 
         override def addTenant( tenant : String ) : Unit = {
+            ???
+        }
+
+        def openTenantInput() : Unit = {
             ele.querySelector( s".$addTenantButtonClass" )
               .asInstanceOf[ HTMLButtonElement ]
               .click()
+        }
 
-            val inputEle = ele.querySelector( s".$newKeyInputClass" )
+        def changeNewTenantInput( newInput : String ) : Unit = {
+            val inputEle = ele.querySelector( s".$newTenantInputClass" )
               .asInstanceOf[ HTMLInputElement ]
 
-            SimEvent.Change( tenant ) simulate inputEle
+            SimEvent.Change( newInput ) simulate inputEle
+        }
 
+        def addNewTenant() : Unit = {
             ele.querySelector( s".$addTenantInputButtonClass" )
               .asInstanceOf[ HTMLButtonElement ]
               .click()
@@ -61,11 +82,13 @@ trait GenericTenantsComponentLayoutTest
 
         override def removeTenant( tenant : String ) : Unit = {
             tenantEle( tenant )
-              .foreach(
-                  _.querySelector( s".$removeTenantButtonClass" )
-                    .asInstanceOf[ HTMLButtonElement ]
-                    .click()
-              )
+              .foreach { ele =>
+                  Try(
+                      ele.querySelector( s".$removeTenantButtonClass" )
+                        .asInstanceOf[ HTMLButtonElement ]
+                        .click()
+                  )
+              }
         }
 
         override def refresh( ) : Unit =
@@ -73,6 +96,13 @@ trait GenericTenantsComponentLayoutTest
               .asInstanceOf[ HTMLButtonElement ]
               .click()
     }
+
+    override def addTenant( tenant : String ) : dsl.Actions = {
+        dsl.action( "Open new tenant input" )( v => Future( v.obs.openTenantInput() ) )
+          .>>( dsl.action( s"Input new tenant: $tenant" )( v => Future( v.obs.changeNewTenantInput( tenant ) ) ) )
+          .>>( dsl.action( "Click add tenant button" )( v => Future( v.obs.addNewTenant() ) ) )
+    }
+
 
     override type Obs = Observation
     override def genObs( ele : HTMLElement ) : Observation = new Observation( ele )

@@ -16,6 +16,8 @@ trait DartTenantsDI {
 	  with DartContextDeps
 	  with DartConfigDeps =>
 
+	lazy val dartTenants : DartTenants = new DartTenants
+
 	class DartTenants
 	  extends SimpleDartComponent[
 		DartTenants.Props,

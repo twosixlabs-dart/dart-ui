@@ -4,7 +4,7 @@ import com.twosixlabs.dart.auth.tenant.{ CorpusTenant, DartTenant, GlobalCorpus 
 import teststate.Exports._
 import utest.{ Tests, test }
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 trait TenantsComponentTest
   extends TenantsComponentTestConfig {
@@ -16,18 +16,26 @@ trait TenantsComponentTest
             Plan.action(
                 clearMockedTenants()
                 >> refreshContextTenants()
+                >> refreshContextTenants()
                   +> mockedTenants.assert.equal()
                   +> contextTenants.assert.equal()
                 >> addMockedTenant( "test-tenant" )
                   +> mockedTenants.assert.equal( CorpusTenant( "test-tenant" ) )
+                  // Shouldn't end up in context until context is refreshed
+                  +> contextTenants.assert.equal()
+                >> refreshContextTenants()
+                  +> mockedTenants.assert.equal( CorpusTenant( "test-tenant" ) )
                   +> contextTenants.assert.equal( CorpusTenant( "test-tenant" ) )
                 >> addMockedTenant( DartTenant.globalId )
+                >> refreshContextTenants()
                   +> mockedTenants.assert.equalIgnoringOrder( CorpusTenant( "test-tenant" ), GlobalCorpus )
                   +> contextTenants.assert.equalIgnoringOrder( CorpusTenant( "test-tenant" ), GlobalCorpus )
                 >> removeMockedTenant( "test-tenant" )
+                >> refreshContextTenants()
                   +> mockedTenants.assert.equal( GlobalCorpus )
                   +> contextTenants.assert.equal( GlobalCorpus )
                 >> removeMockedTenant( DartTenant.globalId )
+                >> refreshContextTenants()
                   +> mockedTenants.assert.equal()
                   +> contextTenants.assert.equal()
             ).run().map( _.assert() )
@@ -48,6 +56,7 @@ trait TenantsComponentTest
                       >> clearMockedTenants()
                       >> addMockedTenant( "t1" )
                       >> refreshContextTenants()
+                      +> html.map( _.contains( "t1" ) ).assert.equal( true )
                       +> currentTenants.assert.equal( "t1" )
                 ).run().map( _.assert() )
             }

@@ -7,6 +7,8 @@ import scalajsbundler.util.JSON
 
 import scala.language.postfixOps
 
+import org.scalajs.jsenv.nodejs.NodeJSEnv
+
 /*
    ##############################################################################################
    ##                                                                                          ##

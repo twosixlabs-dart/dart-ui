@@ -22,10 +22,12 @@ trait InMemoryDartTenantsContextDI
 			displayedTenants : Seq[ DartTenant ] = Nil,
 		)
 
-		case class TestTenantsHook(
+		case class Hook(
 			getState : () => TestTenantsState,
 			modState : ( TestTenantsState => TestTenantsState ) => Unit,
 		)
+
+		val contextComponent = ContextHook.Component[ TestTenantsHook.Hook ]( Some( hookId ) )
 	}
 
 	import TestTenantsHook._
@@ -35,18 +37,26 @@ trait InMemoryDartTenantsContextDI
 	override val dartTenantsContext : DartTenantsContext = new DartTenantsContext {
 		override type BackendType = Backend
 
-		private val contextComponent = ContextHook.Component[ TestTenantsHook.TestTenantsHook ]( Some( hookId ) )
-
 		class Backend( scope : BackendScope[ DartTenantsContext.Props, TestTenantsState ] ) {
-			def refresh : Callback = scope.modState( st => st.copy( displayedTenants = st.tenants ) )
+			def refresh : Callback = for {
+				state <- scope.state
+//				_ <- Callback( println( s"REFRESHING:\n==========\ntenants: ${state.tenants.mkString( ", " )} \ndisplayed tenants: ${state.displayedTenants.mkString( ", " )}" ) )
+				_ <- scope.modState( st => st.copy( displayedTenants = st.tenants ) )
+			} yield ()
 
 			def render( props : DartTenantsContext.Props, state : TestTenantsState ) : VdomNode = {
-				val tenantsContext : TestTenantsHook.TestTenantsHook = TestTenantsHook.TestTenantsHook(
+//				println( s"RENDERING:\n=========\ntenants: ${state.tenants.mkString( ", " )} \ndisplayed tenants: ${state.displayedTenants.mkString( ", " )}" )
+
+				val tenantsContext : TestTenantsHook.Hook = TestTenantsHook.Hook(
 				  ( ) => scope.state.runNow(),
-				  ( mod : TestTenantsState => TestTenantsState ) => scope.modState( mod ).runNow(),
+				  ( mod : TestTenantsState => TestTenantsState ) => ( for {
+					  state <- scope.state
+//					  _ <- Callback( println( s"UPDATING STATE:\n==============\nold state: $state\nnew state: ${mod( state )}" ) )
+					  _ <- scope.modState( mod )
+				  } yield () ).runNow(),
 				)
 
-				contextComponent(
+				TestTenantsHook.contextComponent(
 					(tenantsContext, props.render( state.displayedTenants, refresh ))
 				)
 			}

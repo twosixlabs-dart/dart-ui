@@ -52,6 +52,7 @@ trait DartFrameDI {
         case object Corpex extends AppChoice
         case class CorpexDocument( id : String ) extends AppChoice
         case object Forklift extends AppChoice
+        case object Tenants extends AppChoice
         case object Test extends AppChoice
 
         case class Props(

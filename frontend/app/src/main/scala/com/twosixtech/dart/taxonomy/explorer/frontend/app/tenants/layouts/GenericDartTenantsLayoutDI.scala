@@ -1,9 +1,10 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.layouts
 
+import com.twosixlabs.dart.auth.tenant.DartTenant
 import com.twosixtech.dart.scalajs.layout.button.regular.Button
 import com.twosixtech.dart.scalajs.layout.button.regular.mui.ButtonMui
 import com.twosixtech.dart.scalajs.layout.form.textinput.{ TextInput, TextInputMui }
-import com.twosixtech.dart.scalajs.layout.text.TextMui
+import com.twosixtech.dart.scalajs.layout.text.{ Text, TextMui }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.tenants.{ DartTenantsDI, DartTenantsLayoutDeps }
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
@@ -44,14 +45,17 @@ trait GenericDartTenantsLayoutDI
 				<.div(
 					tenantsListClass.cName,
 					props.tenants.map( v => <.div(
+						^.key := v,
 						tenantClass.cName,
 						TextMui(
-							v
+							v,
+							classes = Text.Classes( tenantNameClass.cName ),
 						),
-						ButtonMui(
+						if ( v == DartTenant.globalId ) EmptyVdom
+						else ButtonMui(
 							onClick = props.removeTenant( v ),
 							element = "Remove",
-							classes = Button.Classes( removeTenantButtonClass.cName )
+							classes = Button.Classes( removeTenantButtonClass.cName ),
 						),
 					) ).toVdomArray,
 				),
@@ -87,6 +91,7 @@ trait GenericDartTenantsLayoutDI
 object GenericDartTenantsLayoutClasses {
 	val tenantsListClass : String = "tenants-list"
 	val tenantClass : String = "tenant"
+	val tenantNameClass : String = "tenant-name"
 	val removeTenantButtonClass : String = "remove-tenant-button"
 	val addTenantButtonClass : String = "add-tenant-button"
 	val newTenantInputClass : String = "new-tenant-input"

@@ -141,6 +141,9 @@ services:
     networks:
       - dart_ui_network
     environment:
+      INDEX_MASTER: in-memory
+      INDEX_1: none
+      INDEX_2: none
       DART_AUTH_BYPASS: "true"
       TENANTS_TEST_MODE: "true"
       CORS_ALLOWED_ORIGINS: http://localhost:8080,http://localhost:80,http://localhost

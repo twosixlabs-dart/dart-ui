@@ -31,7 +31,7 @@ object ContextHook {
             injectionSite.asInstanceOf[ js.Dynamic ].contextHook = apply( context )
         }
 
-        def retrieveContext[ T ]( id : Option[ String ] = None ) : T = {
+        def retrieveHook( id : Option[ String ] = None ) : ContextHook = {
             val injectionSite = outerElement.querySelectorAll( s".${id.getOrElse( defaultId )}" )
               .vector
               .headOption match {
@@ -40,7 +40,7 @@ object ContextHook {
                 case Some( node ) => node
             }
 
-            injectionSite.asInstanceOf[ js.Dynamic ].contextHook.asInstanceOf[ T ]
+            injectionSite.asInstanceOf[ js.Dynamic ].contextHook.asInstanceOf[ ContextHook ]
         }
 
         def cleanupContext() : Unit = {
