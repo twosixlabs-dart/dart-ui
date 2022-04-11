@@ -58,10 +58,26 @@ class MetadataForm extends Component {
       tenantId,
     } = this.props;
 
+    const newTenants = tenantId ? [tenantId] : [];
+
     dispatchSetUploadMetaData({
       ...metaData,
-      tenants: [tenantId],
+      tenants: newTenants,
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    const prevTenantId = prevProps.tenantId;
+    const { tenantId, metaData, dispatchSetUploadMetaData } = this.props;
+
+    if (tenantId !== prevTenantId) {
+      const newTenants = tenantId ? [tenantId] : [];
+
+      dispatchSetUploadMetaData({
+        ...metaData,
+        tenants: newTenants,
+      });
+    }
   }
 
   updateMetadataField = (field) => (text) => {
@@ -91,7 +107,6 @@ class MetadataForm extends Component {
     const {
       metaData,
       labelsText,
-      dispatchSetUploadMetaData,
       tenants,
       tenantId,
       dispatch,
@@ -152,10 +167,6 @@ class MetadataForm extends Component {
                   value={tenantId || ''}
                   onChange={(e) => {
                     dispatch(chooseTenant(e.target.value));
-                    dispatchSetUploadMetaData({
-                      ...metaData,
-                      tenants: [tenantId],
-                    });
                   }}
                   inputProps={{
                     name: 'relevance',

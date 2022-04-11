@@ -7,7 +7,7 @@ import japgolly.scalajs.react.test.SimEvent
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import teststate.dsl.Dsl
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 
 
