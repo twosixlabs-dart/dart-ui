@@ -185,6 +185,7 @@ lazy val server = ( project in file( "backend/server" ) )
 		  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.10.5",
 		  "com.arangodb" %% "velocypack-module-scala" % "1.2.0",
 		  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.10.5",
+		  "com.twosixlabs.dart" %% "dart-arangodb-datastore" % "3.0.16",
 		  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.5",
 	  ),
 	  assemblySettings,

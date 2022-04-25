@@ -1,14 +1,14 @@
 package com.twosixtech.dart.taxonomy.explorer.publication
 
-import com.twosixlabs.dart.auth.tenant.CorpusTenantIndex
+import com.twosixlabs.dart.auth.tenant.{ CorpusTenantIndex, DartTenant }
 import com.twosixlabs.dart.ontologies.OntologyUpdatesNotifier
-import com.twosixlabs.dart.ontologies.api.{OntologyArtifact, OntologyRegistry}
+import com.twosixlabs.dart.ontologies.api.{ OntologyArtifact, OntologyRegistry }
 import com.twosixtech.dart.taxonomy.explorer.models.DartTaxonomyDI
-import com.twosixtech.dart.taxonomy.explorer.serialization.{OntologyReaderDeps, OntologyWriterDeps}
+import com.twosixtech.dart.taxonomy.explorer.serialization.{ OntologyReaderDeps, OntologyWriterDeps }
 
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success, Try }
 
 trait OntologyRegistryOntologyPublicationServiceDI
   extends OntologyPublicationServiceDeps {
@@ -63,6 +63,7 @@ trait OntologyRegistryOntologyPublicationServiceDI
                     case None => ontologyRegistry.latest( tenant )
                     case Some( vers ) => ontologyRegistry.byVersion( tenant, vers )
                 }
+
                 versionTry.map( _.flatMap( v => OntologyReader.ymlToOntology( v.ontology ).toOption ) )
             }
         }
@@ -74,12 +75,13 @@ trait OntologyRegistryOntologyPublicationServiceDI
                     case None => ontologyRegistry.latestStaged( tenant )
                     case Some( _ ) => ontologyRegistry.latestStaged( tenant )
                 }
+
                 versionTry.map( _.flatMap( v => OntologyReader.ymlToOntology( v.ontology ).toOption ) )
             }
         }
 
         override def allTenants : Future[ Map[ String, TV ] ] = {
-            tenantIndex.allTenants transformWith {
+            val nonGlobalTenantsFuture = tenantIndex.allTenants transformWith {
                 case Failure( e ) => Future.failed( e )
                 case Success( tenants ) =>
                     Future.sequence( tenants.map( tenant => {
@@ -92,8 +94,23 @@ trait OntologyRegistryOntologyPublicationServiceDI
                                 stagedArtifactOpt.map( _.stagingVersion ),
                             )
                         } )
-                    } ) ) map ( _.toMap )
+                    } ) )
             }
+
+            val globalTenantFuture = Future.fromTry( for {
+                publishedArtifactOpt <- ontologyRegistry.latest( DartTenant.globalId )
+                stagedArtifactOpt <- ontologyRegistry.latestStaged( DartTenant.globalId )
+            } yield {
+                DartTenant.globalId -> TV(
+                    publishedArtifactOpt.map( _.version ),
+                    stagedArtifactOpt.map( _.stagingVersion ),
+                )
+            } )
+
+            for {
+                nonGlobalTenants <- nonGlobalTenantsFuture
+                globalTenant <- globalTenantFuture
+            } yield ( ( globalTenant +: nonGlobalTenants ).toMap )
         }
     }
 
