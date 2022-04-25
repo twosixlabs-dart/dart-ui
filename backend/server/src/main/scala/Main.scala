@@ -4,7 +4,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import better.files.Resource
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import com.twosixlabs.dart.arangodb.ArangoConf
+import com.twosixlabs.dart.arangodb.{ Arango, ArangoConf }
+import com.twosixlabs.dart.arangodb.tables.CanonicalDocsTable
 import com.twosixlabs.dart.auth.controllers.SecureDartController
 import com.twosixlabs.dart.auth.tenant.indices.ArangoCorpusTenantIndex
 import com.twosixlabs.dart.auth.user.DartUser
@@ -96,6 +97,14 @@ object Main
 
     lazy private val tenantIndex = ArangoCorpusTenantIndex( config )
 
+    lazy private val arango = new Arango( ArangoConf(
+        host = config.getString( "arangodb.host" ),
+        port = config.getInt( "arangodb.port" ),
+        database = config.getString( "arangodb.database" )
+    ) )
+
+    lazy private val docsTable = new CanonicalDocsTable( arango )
+
     lazy private val kafkaProducer = new KafkaProvider( config.getConfig( "kafka" ) ).newProducer[ String, String ]
 
     lazy val timeoutMinutes : Double = config.getDouble( "postgres.timeout.minutes" )
@@ -112,6 +121,7 @@ object Main
             new OntologyRegistryService( new SqlOntologyArtifactTable( ontologyDb, timeoutMinutes.minutes, system.executionContext ) ),
             new KafkaOntologyUpdatesNotifier(
                 tenantIndex,
+                docsTable,
                 kafkaProducer,
                 config.getString( "updates.topic" ),
             )

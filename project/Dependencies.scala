@@ -29,7 +29,7 @@ object Dependencies {
     val scalaTagsVersion = "0.9.4"
     val circeYamlVersion = "0.12.0"
     val betterFilesVersion = "3.8.0"
-    val ontologyRegistryVersion = "3.0.12"
+    val ontologyRegistryVersion = "3.0.19"
     val conceptsApiVersion = "3.0.5"
 
     val scalaMock = Seq( "org.scalamock" %% "scalamock" % scalaMockVersion % "test" )
