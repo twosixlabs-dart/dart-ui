@@ -71,14 +71,15 @@ class SearchBuilderRoot extends Component {
       getResults,
       browseResults,
       corpusOverviewAggQueries,
+      tenantId,
       xhrHandler,
     } = this.props;
 
     const searchBuilderCallback = (boolType, queries, commonAggs, cIndex) => {
       if (queries) {
-        dispatch(executeCountThunk(xhrHandler, queries));
+        dispatch(executeCountThunk(xhrHandler, queries, tenantId));
         if (!browseResults) {
-          dispatch(executeSearch(xhrHandler, queries, corpusOverviewAggQueries));
+          dispatch(executeSearch(xhrHandler, queries, corpusOverviewAggQueries, tenantId));
         } else if (getResults) dispatch(executeSearch(xhrHandler, queries));
         else if (commonAggs) dispatch(executeAggSearchThunk(xhrHandler, queries, commonAggs));
 
@@ -114,6 +115,7 @@ SearchBuilderRoot.propTypes = {
   browseResults: PropTypes.bool.isRequired,
   corpusOverviewAggQueries: PropTypes.shape({}).isRequired,
   xhrHandler: PropTypes.func.isRequired,
+  tenantId: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state, dartContext) {
@@ -123,6 +125,7 @@ function mapStateToProps(state, dartContext) {
     browseResults: state.corpex.searchDisplay.browseResults,
     corpusOverviewAggQueries: state.corpex.corpusView.aggQueries,
     xhrHandler: dartContext.xhrHandler,
+    tenantId: state.dart.nav.tenantId,
   };
 }
 
