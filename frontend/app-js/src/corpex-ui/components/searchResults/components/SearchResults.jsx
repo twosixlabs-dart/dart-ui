@@ -44,8 +44,30 @@ class SearchResults extends Component {
     super(props);
     if (!props.searchExecuted) {
       const queries = getSearchQueries(props.componentMap, props.componentIndex);
-      props.dispatch(executeSearch(props.xhrHandler, queries));
-      props.dispatch(executeCountThunk(props.xhrHandler, queries));
+      props.dispatch(executeSearch(props.xhrHandler, queries, null, props.tenantId));
+      props.dispatch(executeCountThunk(props.xhrHandler, queries, props.tenantId));
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      tenantId,
+      searchExecuted,
+      componentIndex,
+      componentMap,
+      xhrHandler,
+      dispatch,
+    } = this.props;
+
+    const prevTenantId = prevProps.tenantId;
+
+    console.log(`prev tenant: ${prevTenantId}`);
+    console.log(`current tenant: ${tenantId}`);
+
+    if (!searchExecuted && tenantId !== prevTenantId) {
+      const queries = getSearchQueries(componentMap, componentIndex);
+      dispatch(executeSearch(xhrHandler, queries, null, tenantId));
+      dispatch(executeCountThunk(xhrHandler, queries, tenantId));
     }
   }
 

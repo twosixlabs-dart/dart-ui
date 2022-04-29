@@ -489,7 +489,7 @@ DevConfig / runAppMain := Def.sequential(
 runAppMain := ( DevConfig / runAppMain ).value
 
 // Compile and run application
-val runAppJs = taskKey[ Unit ]( "Compile and run all parts of the application application" )
+val runAppJs = taskKey[ Unit ]( "Compile and run pure js and main scalajs parts of the application application" )
 
 ProdConfig / runAppJs := Def.sequential(
 	( ProdConfig / compileConf ),
