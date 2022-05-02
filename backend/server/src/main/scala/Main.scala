@@ -131,7 +131,7 @@ object Main
     private val taxonomy2 = OntologyReader.ymlToOntology( Resource.getAsString( "wm2-ontology.yml" ) ).get
 
     private val authRouterDeps = SecureDartController.deps(
-        serviceNameIn = "concepts",
+        serviceNameIn = "dart-ui",
         config,
     )
 
