@@ -49,12 +49,6 @@ export default function xhrHandler(
     }
   }
 
-  // let user = JSON.parse(localStorage.getItem('user'));
-  // console.log("user:", user);
-  // if (user && user.authdata) {
-  //     console.log("AUTH:", user.authdata);
-  //     xhr.setRequestHeader("Authorizaiton", "basic" + user.authdata);
-  // }
   const formData = new FormData();
   formData.append('metadata', JSON.stringify(metaData));
   formData.append('file', filesData.file);

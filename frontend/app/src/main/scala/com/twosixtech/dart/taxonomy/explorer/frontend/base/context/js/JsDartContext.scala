@@ -222,8 +222,18 @@ trait JsDartContextProviderDI {
                             case _ => NoBody
                         }
 
-                        val progressUploadHandler : js.Function1[ Double, Unit ] =
-                            setProgressUpload.getOrElse( ( _ => Unit ) : js.Function1[ Double, Unit ] )
+                        val progressUploadHandler : js.Function1[ Double, Unit ] = {
+                            // Mapped in this awkward, redundant way so that some side effect like
+                            // logging can be inserted if necessary
+                            setProgressUpload.toOption
+                              .map( ( fn : js.Function1[ Double, Unit ] ) => {
+                                  val newFn : js.Function1[ Double, Unit ] = ( progress : Double ) => {
+                                      fn.apply( progress )
+                                  }
+                                  newFn
+                              } )
+                              .getOrElse( ( ( _ : Double ) => () ) : js.Function1[ Double, Unit ] )
+                        }
 
                         dispatch( startAction )
                         backend.authClient.submit(

@@ -2,13 +2,13 @@ package com.twosixtech.dart.scalajs.backend
 
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
-import org.scalajs.dom.raw.{ErrorEvent, Event, ProgressEvent, XMLHttpRequest}
-import org.scalajs.dom.window
+import org.scalajs.dom.raw.{ ErrorEvent, Event, ProgressEvent, XMLHttpRequest }
+import org.scalajs.dom.{ console, window }
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ Future, Promise }
 import scala.scalajs.js
 import scala.scalajs.js.typedarray._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 class XhrFailure( msg : String ) extends Exception( msg )
 class XhrUnknownFailure extends Exception( "Xhr request failed: cause unknown" )
@@ -107,7 +107,9 @@ object Xhr {
 
         xhr.onloadstart = { _ => onStart( xhr ) }
 
-        xhr.onprogress = { progressEvent => onProgress( progressEvent ) }
+        xhr.upload.onprogress = { progressEvent => {
+            onProgress( progressEvent )
+        } }
 
         body match {
             case None => xhr.send()

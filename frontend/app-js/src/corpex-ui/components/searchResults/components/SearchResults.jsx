@@ -61,9 +61,6 @@ class SearchResults extends Component {
 
     const prevTenantId = prevProps.tenantId;
 
-    console.log(`prev tenant: ${prevTenantId}`);
-    console.log(`current tenant: ${tenantId}`);
-
     if (!searchExecuted && tenantId !== prevTenantId) {
       const queries = getSearchQueries(componentMap, componentIndex);
       dispatch(executeSearch(xhrHandler, queries, null, tenantId));

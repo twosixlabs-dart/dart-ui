@@ -22,7 +22,6 @@ function dartNavReducer(state = initState, action) {
         token: action.token,
         idTokenObj: action.idTokenObj,
       };
-      console.log(newState);
       return newState;
     }
 
