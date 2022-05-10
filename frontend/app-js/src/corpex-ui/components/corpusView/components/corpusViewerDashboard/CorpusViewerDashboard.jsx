@@ -23,20 +23,16 @@ import WithDimensionsDirty from '../../../../../common/components/WithDimensions
 import uuidv4 from '../../../../../common/utilities/helpers';
 import { connect } from '../../../../../dart-ui/context/CustomConnect';
 
+// eslint-disable-next-line arrow-body-style
 const WrappedList = React.lazy(() => {
-  import('dart-ui-scala13-components')
-    .then((module) => {
-      const { DndWrappedList } = module;
-      return DndWrappedList;
-    });
+  return import('dart-ui-scala13-components')
+    .then((module) => ({ default: module.DndWrappedList }));
 });
 
+// eslint-disable-next-line arrow-body-style
 const WrappedListContext = React.lazy(() => {
-  import('dart-ui-scala13-components')
-    .then((module) => {
-      const { DndWrappedListContext } = module;
-      return DndWrappedListContext;
-    });
+  return import('dart-ui-scala13-components')
+    .then((module) => ({ default: module.DndWrappedListContext }));
 });
 
 const styles = () => ({

@@ -12,6 +12,7 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.base.DartComponentDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
 import japgolly.scalajs.react.CtorType.Props
 import japgolly.scalajs.react.component.Js.{ RawMounted, UnmountedWithRawType }
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.{ Children, JsComponent }
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
@@ -34,25 +35,51 @@ object CorpexProps {
     }
 }
 
-@JSImport( "dart-ui-js", "CorpexUi" )
+@JSImport( "../jsAppExport.js", "CorpexUi" )
 @js.native
 object CorpexUIRaw extends js.Object
 
-object CorpexUI {
+object CorpexUIDynamic {
     private val cmp = JsComponent[ CorpexProps, Children.None, Null]( CorpexUIRaw )
     def document( docId :String ) = cmp(
         CorpexProps( true, docId )
     )
+
     def search = cmp( CorpexProps( false, "" ) )
 }
 
-@JSImport( "dart-ui-js", "ForkliftUi" )
+object CorpexUI {
+    def document( docId : String ) : VdomElement = React.Suspense(
+        fallback = "Loading",
+        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
+            CorpexUIDynamic.document( docId )
+        } )
+    )
+
+    lazy val search : VdomElement = React.Suspense(
+        fallback = "Loading",
+        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
+            CorpexUIDynamic.search
+        } )
+    )
+}
+
+@JSImport( "../jsAppExport.js", "ForkliftUi" )
 @js.native
 object ForkliftUIRaw extends js.Object
 
-object ForkliftUI {
+object ForkliftUIDynamic {
     private val cmp = JsComponent[ js.Object, Children.None, Null ]( ForkliftUIRaw )
     lazy val component = cmp( new js.Object )
+}
+
+object ForkliftUI {
+    def apply() : VdomElement = React.Suspense(
+        fallback = "Loading",
+        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
+            ForkliftUIDynamic.component
+        } )
+    )
 }
 
 trait WmDartAppWindowLayoutDI
@@ -86,7 +113,7 @@ trait WmDartAppWindowLayoutDI
                 case DartFrame.Test => <.div( "This is a test" )
                 case DartFrame.Corpex => CorpexUI.search
                 case DartFrame.CorpexDocument( id ) => CorpexUI.document( id )
-                case DartFrame.Forklift => ForkliftUI.component
+                case DartFrame.Forklift => ForkliftUI()
                 case DartFrame.Tenants => dartTenants( DartTenants.Props().toDartProps )
                 case DartFrame.ConceptExplorer =>
                     val app = conceptView match {

@@ -35,7 +35,7 @@ trait ReduxProviderProps extends js.Object {
     var retrieve : js.Function3[ String, js.Function1[ js.Any, Unit ], js.Function1[ String, Unit ], Unit ]
 }
 
-@JSImport( "dart-ui-js", "ReduxProvider" )
+@JSImport( "../jsAppExport.js", "ReduxProvider" )
 @js.native
 object ReduxProviderRaw extends js.Object
 
@@ -100,7 +100,7 @@ trait JsDartContextProviderProps extends js.Object {
     var dartContext : JsDartContext = js.native
 }
 
-@JSImport( "dart-ui-js", "JsDartContextProvider" )
+@JSImport( "../jsAppExport.js", "JsDartContextProvider" )
 @js.native
 object JsDartContextProviderRaw extends js.Object
 

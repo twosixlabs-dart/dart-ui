@@ -5,7 +5,7 @@ const path = require('path');
 
 module.exports = (env, { mode }) => ({
   entry: {
-    app: path.resolve(__dirname, 'src/dart-ui/DevApp.jsx'),
+    app: path.resolve(__dirname, 'src/main/main.js'),
   },
   output: {
     path: path.join(__dirname, '../../public/'),
@@ -37,7 +37,7 @@ module.exports = (env, { mode }) => ({
       {
         test: new RegExp('\\.js$'),
         enforce: 'pre',
-        use: ['source-map-loader'],
+        use: ['scalajs-friendly-source-map-loader'],
       },
       {
         test: /\.worker\.js$/,
@@ -49,6 +49,7 @@ module.exports = (env, { mode }) => ({
         exclude: {
           or: [
             /node_modules/,
+            /main/,
           ],
         },
         loader: 'babel-loader',
@@ -63,6 +64,7 @@ module.exports = (env, { mode }) => ({
           or: [
             /node_modules/,
             /opt\./,
+            /main/,
           ],
         },
         loader: 'eslint-loader',

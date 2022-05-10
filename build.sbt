@@ -324,12 +324,13 @@ lazy val scala13Components = ( project in file( "frontend/scala13-components" ) 
 
 lazy val app = ( project in file( "frontend/app" ) )
   .dependsOn( common % "compile->compile;test->test", components % "compile->compile;test->test" )
-  .enablePlugins( ScalaJSPlugin, ScalaJSBundlerPlugin, JSDependenciesPlugin )
+  .enablePlugins( ScalaJSPlugin )
   .configs( IntegrationConfig, WipConfig )
   .settings(
 	  commonSettings,
 	  testFrameworks := Seq( new TestFramework( "utest.runner.Framework" ) ),
 	  requireJsDomEnv in Test := true,
+	  scalaJSLinkerConfig ~= ( _.withModuleKind( ModuleKind.CommonJSModule ) ),
 	  libraryDependencies ++= scalaJsDom.value
 		++ scalaJsReact.value
 		++ scalaCss.value
@@ -341,60 +342,32 @@ lazy val app = ( project in file( "frontend/app" ) )
 		++ uTest.value
 		++ dartAuthCore.value
 		:+ "com.github.pathikrit" %% "better-files" % betterFilesVersion % Test,
-	  npmDependencies in Compile ++= Seq(
-		  "react" -> "^17.0.2",
-		  "react-dom" -> "^17.0.2",
-		  "prop-types" -> "^15.7.2",
-		  "@material-ui/core" -> "^4.11.4",
-		  "@material-ui/icons" -> "^4.11.2",
-		  "@material-ui/lab" -> "^4.0.0-alpha.56",
-		  "dart-ui-components" -> "file:../../../../../components/dart-ui-components-1.0.0.tgz",
-		  "dart-ui-js" -> "file:../../../../../app-js/dart-ui-js-1.0.0.tgz",
-		  "dart-ui-scala13-components" -> "file:../../../../../scala13-components/dart-ui-scala13-components-1.0.0.tgz",
-		  "lodash" -> "^4.17.15",
-		  "keycloak-js" -> "^12.0.2",
-		  "react-pdf" -> "^4.2.0",
-		  "react-redux" -> "^7.2.1",
-		  "react-router-dom" -> "^6.2.1",
-		  "react-virtualized" -> "^9.22.3",
-		  "redux" -> "^4.1.2",
-		  "redux-thunk" -> "^2.4.1",
-		  "typeface-roboto" -> "0.0.75",
-		  "react-outside-click-handler" -> "^1.3.0",
-		  "react-beautiful-dnd" -> "13.0.0",
-	  ),
-	  npmDevDependencies in Compile ++= Seq(
-		  "html-webpack-plugin" -> "4.5.2",
-		  "dynamic-cdn-webpack-plugin" -> "5.0.0",
-		  "module-to-cdn" -> "3.1.5",
-		  "@babel/core" -> "^7.12.0",
-		  "@babel/plugin-proposal-class-properties" -> "^7.10.4",
-		  "@babel/preset-env" -> "^7.12.0",
-		  "@babel/preset-react" -> "^7.10.4",
-		  "@babel/register" -> "^7.12.0",
-		  "@open-wc/webpack-import-meta-loader" -> "^0.4.7",
-		  "babel-eslint" -> "^10.1.0",
-		  "babel-loader" -> "^8.1.0",
-		  "babel-plugin-syntax-dynamic-import" -> "^6.18.0",
-		  "eslint" -> "^7.27.0",
-		  "eslint-config-airbnb" -> "^18.2.1",
-		  "eslint-config-react" -> "^1.1.7",
-		  "eslint-loader" -> "^4.0.2",
-		  "eslint-plugin-import" -> "^2.22.1",
-		  "eslint-plugin-jsx-a11y" -> "^6.3.1",
-		  "eslint-plugin-react" -> "^7.21.4",
-		  "worker-loader" -> "^3.0.5",
-		  "scalajs-friendly-source-map-loader" -> "^0.1.5",
-		  "webpack" -> "^4.28.0",
-	  ),
-	  additionalNpmConfig := Map( "legacy-peer-deps" -> JSON.bool( true ) ),
+//	  npmDevDependencies in Compile ++= Seq(
+//		  "html-webpack-plugin" -> "4.5.2",
+//		  "dynamic-cdn-webpack-plugin" -> "5.0.0",
+//		  "module-to-cdn" -> "3.1.5",
+//		  "@babel/core" -> "^7.12.0",
+//		  "@babel/plugin-proposal-class-properties" -> "^7.10.4",
+//		  "@babel/preset-env" -> "^7.12.0",
+//		  "@babel/preset-react" -> "^7.10.4",
+//		  "@babel/register" -> "^7.12.0",
+//		  "@open-wc/webpack-import-meta-loader" -> "^0.4.7",
+//		  "babel-eslint" -> "^10.1.0",
+//		  "babel-loader" -> "^8.1.0",
+//		  "babel-plugin-syntax-dynamic-import" -> "^6.18.0",
+//		  "eslint" -> "^7.27.0",
+//		  "eslint-config-airbnb" -> "^18.2.1",
+//		  "eslint-config-react" -> "^1.1.7",
+//		  "eslint-loader" -> "^4.0.2",
+//		  "eslint-plugin-import" -> "^2.22.1",
+//		  "eslint-plugin-jsx-a11y" -> "^6.3.1",
+//		  "eslint-plugin-react" -> "^7.21.4",
+//		  "worker-loader" -> "^3.0.5",
+//		  "scalajs-friendly-source-map-loader" -> "^0.1.5",
+//		  "webpack" -> "^4.28.0",
+//	  ),
 	  scalaJSUseMainModuleInitializer := true,
 	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
-//	  useYarn := true,
-	  webpack / version := "4.28.4",
-	  npmExtraArgs := Seq( "--legacy-peer-deps" ),
-	  webpackConfigFile := Some( baseDirectory.value / "app.config.js" ),
-	  webpackConfigFile in Test := Some( baseDirectory.value / "app.config.test.js" ),
   )
 
 /*
@@ -405,104 +378,79 @@ lazy val app = ( project in file( "frontend/app" ) )
    ##############################################################################################
  */
 
-// Copy raw-js to appropriate directory in app/target for webpack
-val prepareJs = taskKey[ Unit ]( "Copy other js artifacts to app/target for webpack" )
-prepareJs := { Seq( "/bin/sh", "-c", "./scripts/build-js.sh" ) ! }
+// Build scala.js components and run build script to bundle with raw-js
+val assembleJs = taskKey[ Unit ]( "Build frontend and bundle with raw-js" )
+
+ProdConfig / assembleJs := {
+	( scala13Components / Compile / fullLinkJS ).value
+	( app / Compile / fullLinkJS ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "prod" ) !
+}
+
+DevConfig / assembleJs := {
+	( scala13Components / Compile / fastLinkJS ).value
+	( app / Compile / fastLinkJS ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "dev" ) !
+}
+
 
 // Compile Application
-val compileApp = taskKey[ Unit ]( "Compile frontend and backend" )
+val compileJs = taskKey[ Unit ]( "Compile frontend components" )
 
-ProdConfig / compileApp := Def.sequential(
-	( scala13Components / Compile / fullLinkJS ),
-	( prepareJs ),
-	( app / Compile / fullOptJS / webpack ),
-	( server / Compile / compile ),
-).value
-
-DevConfig / compileApp := Def.sequential(
-	( scala13Components / Compile / fullLinkJS ),
-	( prepareJs ),
-	( app / Compile / fastOptJS / webpack ),
-	( server / Compile / compile ),
-).value
-
-compileApp := ( DevConfig / compileApp ).value
-
-val compileConf = taskKey[ Unit ]( "Compile js config file" )
-
-ProdConfig / compileConf := {
-	s"scripts/inject-config.sh" !
+ProdConfig / compileJs := {
+	( scala13Components / Compile / compile ).value
+	( app / Compile / compile ).value
 }
-DevConfig / compileConf := {
-	s"scripts/inject-config.sh" !
+
+DevConfig / compileJs := {
+	( scala13Components / Compile / compile ).value
+	( app / Compile / compile ).value
 }
+
+compileJs := ( DevConfig / compileJs ).value
+
+val injectConf = taskKey[ Unit ]( "Compile js config file" )
+
+ProdConfig / injectConf := {
+	Seq( s"scripts/inject-config.sh", "prod" ) !
+}
+
+DevConfig / injectConf := {
+	Seq( s"scripts/inject-config.sh", "dev" ) !
+}
+
+injectConf := DevConfig / injectConf
 
 // Build Application
 val assembleApp = taskKey[ Unit ]( "Build fatjar of application" )
 
-ProdConfig / assembleApp := Def.sequential(
-	( scala13Components / Compile / fullLinkJS ),
-	( ProdConfig / prepareJs ),
-	( app / Compile / fullOptJS / webpack ),
-	( server / Compile / assembly ),
-).value
-DevConfig / assembleApp := Def.sequential(
-	( scala13Components / Compile / fullLinkJS ),
-	( prepareJs ),
-	( app / Compile / fastOptJS / webpack ),
-	( server / Compile / assembly ),
-).value
+ProdConfig / assembleApp := {
+	( ProdConfig / assembleJs ).value
+	( server / Compile / assembly ).value
+}
+
+DevConfig / assembleApp :=  {
+	( DevConfig / assembleJs ).value
+	( server / Compile / assembly ).value
+}
+
 assembleApp := ( DevConfig / assembleApp ).value
 
-
 // Compile and run application
-val runAppFull = taskKey[ Unit ]( "Compile and run all parts of the application application" )
+val runApp = taskKey[ Unit ]( "Assemble js and run server to run the complete application" )
 
-ProdConfig / runAppFull := Def.sequential(
-	( ProdConfig / compileConf ),
-	( scala13Components / Compile / fullLinkJS ),
-	( prepareJs ),
-	( app / Compile / fullOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-DevConfig / runAppFull := Def.sequential(
-	( DevConfig / compileConf ),
-	( scala13Components / Compile / fullLinkJS ),
-	( prepareJs ),
-	( app / Compile / fastOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-runAppFull := ( DevConfig / runAppFull ).value
+ProdConfig / runApp := {
+	( ProdConfig / assembleJs ).value
+	( ProdConfig / injectConf ).value
+	( server / Compile / run ).toTask( " -i" )
+}
 
-// Compile and run main application
-val runAppMain = taskKey[ Unit ]( "Run app, but only build main scalajs part" )
+DevConfig / runApp := {
+	( DevConfig / assembleJs ).value
+	( DevConfig / injectConf ).value
+	( server / Compile / run ).toTask( " -i" )
+}
 
-ProdConfig / runAppMain := Def.sequential(
-	( app / Compile / fullOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-DevConfig / runAppMain := Def.sequential(
-	( ProdConfig / compileConf ),
-	( app / Compile / fastOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-runAppMain := ( DevConfig / runAppMain ).value
-
-// Compile and run application
-val runAppJs = taskKey[ Unit ]( "Compile and run pure js and main scalajs parts of the application application" )
-
-ProdConfig / runAppJs := Def.sequential(
-	( ProdConfig / compileConf ),
-	( prepareJs ),
-	( app / Compile / fullOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-DevConfig / runAppJs := Def.sequential(
-	( DevConfig / compileConf ),
-	( prepareJs ),
-	( app / Compile / fastOptJS / webpack ),
-	( server / Compile / run ).toTask( " -i" ),
-).value
-runAppJs := ( DevConfig / runAppJs ).value
+runApp := ( DevConfig / runApp ).value
 
 

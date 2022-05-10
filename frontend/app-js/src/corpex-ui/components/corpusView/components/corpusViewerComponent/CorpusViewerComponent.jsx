@@ -26,12 +26,10 @@ import WithDimensionsDirty from '../../../../../common/components/WithDimensions
 import uuidv4 from '../../../../../common/utilities/helpers';
 import TagTypesCorpusViewerComponent from './dataComponents/tagTypesComponent/TagTypesCorpusViewerComponent';
 
+// eslint-disable-next-line arrow-body-style
 const WrappedList = React.lazy(() => {
-  import('dart-ui-scala13-components')
-    .then((module) => {
-      const { DndWrappedList } = module;
-      return DndWrappedList;
-    });
+  return import('dart-ui-scala13-components')
+    .then((module) => ({ default: module.DndWrappedList }));
 });
 
 const styles = () => ({
