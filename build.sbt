@@ -324,7 +324,7 @@ lazy val scala13Components = ( project in file( "frontend/scala13-components" ) 
 
 lazy val app = ( project in file( "frontend/app" ) )
   .dependsOn( common % "compile->compile;test->test", components % "compile->compile;test->test" )
-  .enablePlugins( ScalaJSPlugin )
+  .enablePlugins( ScalaJSPlugin, ScalaJSBundlerPlugin, JSDependenciesPlugin )
   .configs( IntegrationConfig, WipConfig )
   .settings(
 	  commonSettings,
@@ -344,6 +344,53 @@ lazy val app = ( project in file( "frontend/app" ) )
 		:+ "com.github.pathikrit" %% "better-files" % betterFilesVersion % Test,
 	  scalaJSUseMainModuleInitializer := true,
 	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
+	  npmDependencies in Compile ++= Seq(
+		  "react" -> "^17.0.2",
+		  "react-dom" -> "^17.0.2",
+		  "prop-types" -> "^15.7.2",
+		  "@material-ui/core" -> "^4.11.4",
+		  "@material-ui/icons" -> "^4.11.2",
+		  "@material-ui/lab" -> "^4.0.0-alpha.56",
+		  "dart-ui-components" -> "file:../../../../../components/dart-ui-components-1.0.0.tgz",
+		  "dart-ui-scala13-components" -> "file:../../../../../scala13-components/dart-ui-scala13-components-1.0.0.tgz",
+		  "lodash" -> "^4.17.15",
+		  "keycloak-js" -> "^12.0.2",
+		  "react-pdf" -> "^4.2.0",
+		  "react-redux" -> "^7.2.1",
+		  "react-router-dom" -> "^6.2.1",
+		  "react-virtualized" -> "^9.22.3",
+		  "redux" -> "^4.1.2",
+		  "redux-thunk" -> "^2.4.1",
+		  "typeface-roboto" -> "0.0.75",
+		  "react-outside-click-handler" -> "^1.3.0",
+		  "react-beautiful-dnd" -> "13.0.0",
+	  ),
+	  npmDevDependencies in Compile ++= Seq(
+		  "html-webpack-plugin" -> "4.5.2",
+		  "dynamic-cdn-webpack-plugin" -> "5.0.0",
+		  "module-to-cdn" -> "3.1.5",
+		  "@babel/core" -> "^7.12.0",
+		  "@babel/plugin-proposal-class-properties" -> "^7.10.4",
+		  "@babel/preset-env" -> "^7.12.0",
+		  "@babel/preset-react" -> "^7.10.4",
+		  "@babel/register" -> "^7.12.0",
+		  "@open-wc/webpack-import-meta-loader" -> "^0.4.7",
+		  "babel-eslint" -> "^10.1.0",
+		  "babel-loader" -> "^8.1.0",
+		  "babel-plugin-syntax-dynamic-import" -> "^6.18.0",
+		  "eslint" -> "^7.27.0",
+		  "eslint-config-airbnb" -> "^18.2.1",
+		  "eslint-config-react" -> "^1.1.7",
+		  "eslint-loader" -> "^4.0.2",
+		  "eslint-plugin-import" -> "^2.22.1",
+		  "eslint-plugin-jsx-a11y" -> "^6.3.1",
+		  "eslint-plugin-react" -> "^7.21.4",
+		  "worker-loader" -> "^3.0.5",
+		  "scalajs-friendly-source-map-loader" -> "^0.1.5",
+		  "webpack" -> "^4.28.0",
+	  ),
+	  webpackConfigFile in Test := Some( baseDirectory.value / "app.config.test.js" ),
+	  webpack / version := "4.28.4",
   )
 
 /*
