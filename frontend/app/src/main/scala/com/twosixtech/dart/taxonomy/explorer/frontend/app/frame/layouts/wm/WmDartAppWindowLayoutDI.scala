@@ -1,5 +1,6 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.layouts.wm
 
+import com.twosixtech.dart.scalajs.layout.loading.mui.LoadingMui
 import com.twosixtech.dart.scalajs.layout.menu.tabs.{ DartTabs, DartTabsTranslation }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.DartClusterCuratorFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.layouts.wm.WmDartClusterCuratorFrameLayoutDI
@@ -24,62 +25,43 @@ import scala.scalajs.js.annotation.JSImport
 trait CorpexProps extends js.Object {
     var docView : Boolean = js.native
     var documentId : String = js.native
+    var loader : raw.React.Node = js.native
 }
 
 object CorpexProps {
-    def apply( docView : Boolean = false, documentId : String = "" ) : CorpexProps = {
+    def apply( docView : Boolean = false, documentId : String = "", loader : VdomNode ) : CorpexProps = {
         val cp = ( new js.Object ).asInstanceOf[ CorpexProps ]
         cp.docView = docView
         cp.documentId = documentId
+        cp.loader = loader.rawNode
         cp
     }
 }
 
-@JSImport( "../jsAppExport.js", "CorpexUi" )
+@JSImport( "../jsAppExport.jsx", "CorpexUi" )
 @js.native
 object CorpexUIRaw extends js.Object
 
-object CorpexUIDynamic {
-    private val cmp = JsComponent[ CorpexProps, Children.None, Null]( CorpexUIRaw )
-    def document( docId :String ) = cmp(
-        CorpexProps( true, docId )
-    )
-
-    def search = cmp( CorpexProps( false, "" ) )
-}
-
 object CorpexUI {
-    def document( docId : String ) : VdomElement = React.Suspense(
-        fallback = "Loading",
-        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
-            CorpexUIDynamic.document( docId )
-        } )
+    private val cmp = JsComponent[ CorpexProps, Children.None, Null]( CorpexUIRaw )
+    def document( docId :String, loader : VdomNode ) =
+        cmp( CorpexProps( true, docId, loader )
     )
 
-    lazy val search : VdomElement = React.Suspense(
-        fallback = "Loading",
-        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
-            CorpexUIDynamic.search
-        } )
-    )
+    def search( loader : VdomNode ) =
+        cmp( CorpexProps( false, "", loader ) )
 }
 
-@JSImport( "../jsAppExport.js", "ForkliftUi" )
+@JSImport( "../jsAppExport.jsx", "ForkliftUi" )
 @js.native
 object ForkliftUIRaw extends js.Object
 
-object ForkliftUIDynamic {
-    private val cmp = JsComponent[ js.Object, Children.None, Null ]( ForkliftUIRaw )
-    lazy val component = cmp( new js.Object )
-}
-
 object ForkliftUI {
-    def apply() : VdomElement = React.Suspense(
-        fallback = "Loading",
-        asyncBody = AsyncCallback.fromJsPromise( js.dynamicImport {
-            ForkliftUIDynamic.component
-        } )
-    )
+    private lazy val component = JsComponent[ js.Object, Children.None, Null ]( ForkliftUIRaw )
+    def apply( loader : Option[ VdomNode ] ) : UnmountedWithRawType[ js.Object, Null, RawMounted[js.Object, Null ] ] =
+        component( loader.map( ldr => js.Dictionary(
+            "loader" -> ldr.rawNode,
+        ).asInstanceOf[ js.Object ] ).getOrElse( new js.Object() ) )
 }
 
 trait WmDartAppWindowLayoutDI
@@ -111,9 +93,10 @@ trait WmDartAppWindowLayoutDI
 
             props.appChoice match {
                 case DartFrame.Test => <.div( "This is a test" )
-                case DartFrame.Corpex => CorpexUI.search
-                case DartFrame.CorpexDocument( id ) => CorpexUI.document( id )
-                case DartFrame.Forklift => ForkliftUI()
+                case DartFrame.Corpex => CorpexUI.search( LoadingMui.LoadingCircularMui() )
+                case DartFrame.CorpexDocument( id ) =>
+                    CorpexUI.document( id, LoadingMui.LoadingCircularMui() )
+                case DartFrame.Forklift => ForkliftUI( Some( LoadingMui.LoadingCircularMui() ) )
                 case DartFrame.Tenants => dartTenants( DartTenants.Props().toDartProps )
                 case DartFrame.ConceptExplorer =>
                     val app = conceptView match {

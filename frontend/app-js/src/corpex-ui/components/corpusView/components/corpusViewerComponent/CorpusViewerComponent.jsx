@@ -174,6 +174,7 @@ class CorpusViewerSectionComponent extends Component {
       count,
       dispatch,
       classes,
+      loader,
     } = this.props;
 
     const { props } = this;
@@ -192,7 +193,7 @@ class CorpusViewerSectionComponent extends Component {
           className="corpus-overview-dashboard"
         >
           {({ outerWidth }) => (
-            <Suspense fallback={<div>Loading</div>}>
+            <Suspense fallback={loader}>
               <WrappedList
                 listId={id}
                 listClass={id}
@@ -240,8 +241,9 @@ class CorpusViewerSectionComponent extends Component {
   }
 }
 
-const sectionMapStateToProps = (state) => ({
+const sectionMapStateToProps = (state, dartContext) => ({
   componentIndex: state.corpex.corpusView.componentIndex,
+  loader: dartContext.loader,
 });
 
 // eslint-disable-next-line max-len
@@ -258,6 +260,7 @@ CorpusViewerSectionComponent.propTypes = {
   count: PropTypes.number.isRequired,
   outerWidth: PropTypes.number.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  loader: PropTypes.node.isRequired,
 };
 
 class CorpusViewerComponent extends Component {

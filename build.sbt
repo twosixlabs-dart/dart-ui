@@ -342,30 +342,6 @@ lazy val app = ( project in file( "frontend/app" ) )
 		++ uTest.value
 		++ dartAuthCore.value
 		:+ "com.github.pathikrit" %% "better-files" % betterFilesVersion % Test,
-//	  npmDevDependencies in Compile ++= Seq(
-//		  "html-webpack-plugin" -> "4.5.2",
-//		  "dynamic-cdn-webpack-plugin" -> "5.0.0",
-//		  "module-to-cdn" -> "3.1.5",
-//		  "@babel/core" -> "^7.12.0",
-//		  "@babel/plugin-proposal-class-properties" -> "^7.10.4",
-//		  "@babel/preset-env" -> "^7.12.0",
-//		  "@babel/preset-react" -> "^7.10.4",
-//		  "@babel/register" -> "^7.12.0",
-//		  "@open-wc/webpack-import-meta-loader" -> "^0.4.7",
-//		  "babel-eslint" -> "^10.1.0",
-//		  "babel-loader" -> "^8.1.0",
-//		  "babel-plugin-syntax-dynamic-import" -> "^6.18.0",
-//		  "eslint" -> "^7.27.0",
-//		  "eslint-config-airbnb" -> "^18.2.1",
-//		  "eslint-config-react" -> "^1.1.7",
-//		  "eslint-loader" -> "^4.0.2",
-//		  "eslint-plugin-import" -> "^2.22.1",
-//		  "eslint-plugin-jsx-a11y" -> "^6.3.1",
-//		  "eslint-plugin-react" -> "^7.21.4",
-//		  "worker-loader" -> "^3.0.5",
-//		  "scalajs-friendly-source-map-loader" -> "^0.1.5",
-//		  "webpack" -> "^4.28.0",
-//	  ),
 	  scalaJSUseMainModuleInitializer := true,
 	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
   )
@@ -384,14 +360,22 @@ val assembleJs = taskKey[ Unit ]( "Build frontend and bundle with raw-js" )
 ProdConfig / assembleJs := {
 	( scala13Components / Compile / fullLinkJS ).value
 	( app / Compile / fullLinkJS ).value
+}
+ProdConfig / assembleJs := {
+	( ProdConfig / assembleJs ).value
 	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "prod" ) !
 }
 
 DevConfig / assembleJs := {
 	( scala13Components / Compile / fastLinkJS ).value
 	( app / Compile / fastLinkJS ).value
+}
+DevConfig / assembleJs := {
+	( DevConfig / assembleJs ).value
 	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "dev" ) !
 }
+
+assembleJs := ( DevConfig / assembleJs ).value
 
 
 // Compile Application
@@ -442,15 +426,19 @@ val runApp = taskKey[ Unit ]( "Assemble js and run server to run the complete ap
 ProdConfig / runApp := {
 	( ProdConfig / assembleJs ).value
 	( ProdConfig / injectConf ).value
-	( server / Compile / run ).toTask( " -i" )
 }
+ProdConfig / runApp := Def.sequential(
+	ProdConfig / runApp,
+	( server / Compile / run ).toTask( " -i" ),
+).value
 
 DevConfig / runApp := {
 	( DevConfig / assembleJs ).value
 	( DevConfig / injectConf ).value
-	( server / Compile / run ).toTask( " -i" )
 }
+DevConfig / runApp := Def.sequential(
+	DevConfig / runApp,
+	( server / Compile / run ).toTask( " -i" ),
+).value
 
 runApp := ( DevConfig / runApp ).value
-
-

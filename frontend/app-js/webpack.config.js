@@ -12,7 +12,7 @@ module.exports = (env, { mode }) => ({
     publicPath: '/',
     filename: mode === 'production' ? 'js/dart-ui.[name].[chunkhash].js' : 'js/dart-ui.[name].[hash].js',
   },
-  devtool: 'source-map',
+  devtool: mode === 'production' ? undefined : 'source-map',
   optimization: {
     splitChunks: { chunks: 'all' },
   },
@@ -41,7 +41,12 @@ module.exports = (env, { mode }) => ({
       },
       {
         test: /\.worker\.js$/,
-        exclude: /node_modules/,
+        exclude: {
+          or: [
+            /node_modules/,
+            /main/,
+          ],
+        },
         use: { loader: 'worker-loader' },
       },
       {

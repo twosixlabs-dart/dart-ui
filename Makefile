@@ -18,7 +18,7 @@ docker-login:
 	docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
 
 docker-build-app:
-	SBT_OPTS="-Xmx4G -Xss2M" sbt clean dev:assembleApp
+	SBT_OPTS="-Xmx4G -Xss2M" sbt clean prod:assembleApp
 	docker build -t $(IMG):$(APP_VERSION) .
 
 docker-push-app: docker-login docker-build

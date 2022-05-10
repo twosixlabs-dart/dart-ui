@@ -185,6 +185,7 @@ class CorpusViewerDashboard extends Component {
       componentIndex,
       searchResults,
       classes,
+      loader,
     } = this.props;
 
     const aggregations = 'aggregations' in searchResults ? searchResults.aggregations : {};
@@ -195,7 +196,7 @@ class CorpusViewerDashboard extends Component {
         className="corpus-overview-dashboard"
       >
         {({ outerWidth }) => (
-          <Suspense fallback={<div>Loading</div>}>
+          <Suspense fallback={loader}>
             <WrappedListContext
               onRearrange={(map) => {
                 Object.keys(map).forEach((key) => {
@@ -210,7 +211,7 @@ class CorpusViewerDashboard extends Component {
               }}
             >
               {(context) => (
-                <Suspense fallback={<div>Loading</div>}>
+                <Suspense fallback={loader}>
                   <WrappedList
                     listId="root"
                     listClass="root"
@@ -270,6 +271,7 @@ CorpusViewerDashboard.propTypes = {
   dispatch: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
   xhrHandler: PropTypes.func.isRequired,
+  loader: PropTypes.node.isRequired,
 };
 
 function mapStateToProps(state, dartContext) {
@@ -280,6 +282,7 @@ function mapStateToProps(state, dartContext) {
     searchQueries: state.corpex.searchResults.searchQueries,
     allAggQueries: state.corpex.corpusView.aggQueries,
     xhrHandler: dartContext.xhrHandler,
+    loader: dartContext.loader,
   };
 }
 

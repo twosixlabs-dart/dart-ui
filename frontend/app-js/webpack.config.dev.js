@@ -12,7 +12,6 @@ module.exports = (env, { mode }) => ({
     publicPath: '/',
     filename: mode === 'production' ? 'js/dart-ui.[name].[chunkhash].js' : 'js/dart-ui.[name].[hash].js',
   },
-  devtool: 'source-map',
   optimization: {
     splitChunks: { chunks: 'all' },
   },
