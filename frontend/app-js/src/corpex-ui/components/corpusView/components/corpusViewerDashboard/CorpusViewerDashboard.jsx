@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import PropTypes from 'prop-types';
 
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Paper } from '@material-ui/core';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { DndWrappedList, DndWrappedListContext } from 'dart-ui-scala13-components';
+// import { DndWrappedList, DndWrappedListContext } from 'dart-ui-scala13-components';
 // import ReactGridLayout from 'react-grid-layout/lib/ReactGridLayout';
 
 import corpusViewPropTypes from '../../corpusView.propTypes';
@@ -22,6 +22,22 @@ import executeSearch from '../../../searchBuilder/thunk/executeSearch.thunk';
 import WithDimensionsDirty from '../../../../../common/components/WithDimensionsDirty';
 import uuidv4 from '../../../../../common/utilities/helpers';
 import { connect } from '../../../../../dart-ui/context/CustomConnect';
+
+const WrappedList = React.lazy(() => {
+  import('dart-ui-scala13-components')
+    .then((module) => {
+      const { DndWrappedList } = module;
+      return DndWrappedList;
+    });
+});
+
+const WrappedListContext = React.lazy(() => {
+  import('dart-ui-scala13-components')
+    .then((module) => {
+      const { DndWrappedListContext } = module;
+      return DndWrappedListContext;
+    });
+});
 
 const styles = () => ({
   componentEle: {
@@ -183,63 +199,66 @@ class CorpusViewerDashboard extends Component {
         className="corpus-overview-dashboard"
       >
         {({ outerWidth }) => (
-          <DndWrappedListContext
-            onRearrange={(map) => {
-              Object.keys(map).forEach((key) => {
-                if (key === 'root') dispatch(updateComponentMap(map[key]));
-                else {
-                  dispatch(updateComponentState(key, {
-                    ...componentIndex[key].state,
-                    componentMap: map[key],
-                  }));
-                }
-              });
-            }}
-          >
-            {(context) => (
-              <DndWrappedList
-                listId="root"
-                listClass="root"
-                context={context}
-                list={componentMap}
-                maxWidth={outerWidth}
-                renderer={({ key, dragHandleProps }) => {
-                  const componentId = key;
-                  if (!componentMap.includes(componentId)) return <div />;
-
-                  const aggresultsKeys = Object.keys(aggregations)
-                    .filter((k) => k.startsWith(componentId));
-                  const aggResults = {};
-                  aggresultsKeys.forEach((k) => {
-                    aggResults[k.replace(`${componentId}-`, '')] = aggregations[k];
-                  });
-                  return (
-                    <div
-                      className={classes.componentEle}
-                      key={componentId}
-                      data-grid={componentIndex[componentId].layout}
-                    >
-                      <Paper classes={{ root: classes.componentPaper }}>
-                        <CorpusViewerComponent
-                          aggResults={aggResults}
-                          context={context}
-                          componentIndex={componentIndex}
-                          addComponent={this.addComponent(componentId)}
-                          removeComponent={this.removeComponent(componentId)}
-                          updateData={this.updateDataGen(componentId)}
-                          updateState={this.updateStateGen(componentId)}
-                          outerWidth={outerWidth - 40}
-                          id={componentId}
-                          key={`corpus-viewer-component-${componentId}`}
-                          dragHandleProps={dragHandleProps}
-                        />
-                      </Paper>
-                    </div>
-                  );
-                }}
-              />
-            )}
-          </DndWrappedListContext>
+          <Suspense fallback={<div>Loading</div>}>
+            <WrappedListContext
+              onRearrange={(map) => {
+                Object.keys(map).forEach((key) => {
+                  if (key === 'root') dispatch(updateComponentMap(map[key]));
+                  else {
+                    dispatch(updateComponentState(key, {
+                      ...componentIndex[key].state,
+                      componentMap: map[key],
+                    }));
+                  }
+                });
+              }}
+            >
+              {(context) => (
+                <Suspense fallback={<div>Loading</div>}>
+                  <WrappedList
+                    listId="root"
+                    listClass="root"
+                    context={context}
+                    list={componentMap}
+                    maxWidth={outerWidth}
+                    renderer={({ key, dragHandleProps }) => {
+                      const componentId = key;
+                      if (!componentMap.includes(componentId)) return <div />;
+                      const aggresultsKeys = Object.keys(aggregations)
+                        .filter((k) => k.startsWith(componentId));
+                      const aggResults = {};
+                      aggresultsKeys.forEach((k) => {
+                        aggResults[k.replace(`${componentId}-`, '')] = aggregations[k];
+                      });
+                      return (
+                        <div
+                          className={classes.componentEle}
+                          key={componentId}
+                          data-grid={componentIndex[componentId].layout}
+                        >
+                          <Paper classes={{ root: classes.componentPaper }}>
+                            <CorpusViewerComponent
+                              aggResults={aggResults}
+                              context={context}
+                              componentIndex={componentIndex}
+                              addComponent={this.addComponent(componentId)}
+                              removeComponent={this.removeComponent(componentId)}
+                              updateData={this.updateDataGen(componentId)}
+                              updateState={this.updateStateGen(componentId)}
+                              outerWidth={outerWidth - 40}
+                              id={componentId}
+                              key={`corpus-viewer-component-${componentId}`}
+                              dragHandleProps={dragHandleProps}
+                            />
+                          </Paper>
+                        </div>
+                      );
+                    }}
+                  />
+                </Suspense>
+              )}
+            </WrappedListContext>
+          </Suspense>
         )}
       </WithDimensionsDirty>
     );
