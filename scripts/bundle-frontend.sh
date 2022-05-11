@@ -3,6 +3,9 @@
 ## Bundle scalajs app with the raw js dependencies (which are
 ## built using `build-raw-js.sh`
 
+echo "Bundling Frontend"
+echo $PWD
+
 rm frontend/app-js/src/main/*
 echo "Copying scala.js artifacts to app-js"
 if [ $1="prod" ]; then
@@ -22,4 +25,6 @@ if [ $1="prod" ]; then
 else
    npx webpack --mode="development"
 fi
+
+cd ../..
 
