@@ -22,6 +22,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "dart-ui-scala13-components": "file:../scala13-components/dart-ui-scala13-components-1.0.0.tgz",
+    "dart-ui-components": "file:../components/dart-ui-components-1.0.0.tgz",
     "keycloak-js": "^17.0.0",
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",
@@ -44,6 +45,7 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.10.4",
     "@babel/register": "^7.12.0",
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
@@ -61,6 +63,8 @@
     "webpack": "^4.28.4",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "4.7.4",
-    "worker-loader": "^3.0.5"
+    "worker-loader": "^3.0.5",
+    "dynamic-cdn-webpack-plugin": "5.0.0",
+    "scalajs-friendly-source-map-loader": "^0.1.5"
   }
 }

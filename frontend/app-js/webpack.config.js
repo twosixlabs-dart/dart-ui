@@ -5,14 +5,14 @@ const path = require('path');
 
 module.exports = (env, { mode }) => ({
   entry: {
-    app: path.resolve(__dirname, 'src/dart-ui/DevApp.jsx'),
+    app: path.resolve(__dirname, 'src/main/main.js'),
   },
   output: {
     path: path.join(__dirname, '../../public/'),
     publicPath: '/',
     filename: mode === 'production' ? 'js/dart-ui.[name].[chunkhash].js' : 'js/dart-ui.[name].[hash].js',
   },
-  devtool: 'source-map',
+  devtool: mode === 'production' ? undefined : 'source-map',
   optimization: {
     splitChunks: { chunks: 'all' },
   },
@@ -37,11 +37,16 @@ module.exports = (env, { mode }) => ({
       {
         test: new RegExp('\\.js$'),
         enforce: 'pre',
-        use: ['source-map-loader'],
+        use: ['scalajs-friendly-source-map-loader'],
       },
       {
         test: /\.worker\.js$/,
-        exclude: /node_modules/,
+        exclude: {
+          or: [
+            /node_modules/,
+            /main/,
+          ],
+        },
         use: { loader: 'worker-loader' },
       },
       {
@@ -49,6 +54,7 @@ module.exports = (env, { mode }) => ({
         exclude: {
           or: [
             /node_modules/,
+            /main/,
           ],
         },
         loader: 'babel-loader',
@@ -63,6 +69,7 @@ module.exports = (env, { mode }) => ({
           or: [
             /node_modules/,
             /opt\./,
+            /main/,
           ],
         },
         loader: 'eslint-loader',

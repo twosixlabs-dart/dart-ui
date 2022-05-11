@@ -10,4 +10,8 @@ cd frontend/config-js
 
 npm install
 
-npx webpack
+if [ $1="prod" ]; then
+   npx webpack --mode="production"
+else
+   npx webpack --mode="development"
+fi

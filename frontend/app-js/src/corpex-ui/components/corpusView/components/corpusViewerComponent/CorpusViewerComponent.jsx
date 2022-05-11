@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -7,7 +7,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { Paper } from '@material-ui/core';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { DndWrappedList } from 'dart-ui-scala13-components';
+// import { DndWrappedList } from 'dart-ui-scala13-components';
 
 import corpusViewPropTypes from '../../corpusView.propTypes';
 import CorpusViewerComponentHeader from './CorpusViewerComponentHeader';
@@ -25,6 +25,12 @@ import NumberComponent from './dataComponents/numberComponent/NumberComponent';
 import WithDimensionsDirty from '../../../../../common/components/WithDimensionsDirty';
 import uuidv4 from '../../../../../common/utilities/helpers';
 import TagTypesCorpusViewerComponent from './dataComponents/tagTypesComponent/TagTypesCorpusViewerComponent';
+
+// eslint-disable-next-line arrow-body-style
+const WrappedList = React.lazy(() => {
+  return import('dart-ui-scala13-components')
+    .then((module) => ({ default: module.DndWrappedList }));
+});
 
 const styles = () => ({
   componentGridEle: {
@@ -168,6 +174,7 @@ class CorpusViewerSectionComponent extends Component {
       count,
       dispatch,
       classes,
+      loader,
     } = this.props;
 
     const { props } = this;
@@ -186,45 +193,47 @@ class CorpusViewerSectionComponent extends Component {
           className="corpus-overview-dashboard"
         >
           {({ outerWidth }) => (
-            <DndWrappedList
-              listId={id}
-              listClass={id}
-              context={context}
-              list={componentMap}
-              maxWidth={outerWidth}
-              renderer={({ key, dragHandleProps }) => {
-                const cId = key;
-                if (!componentMap.includes(cId)) return <div />;
+            <Suspense fallback={loader}>
+              <WrappedList
+                listId={id}
+                listClass={id}
+                context={context}
+                list={componentMap}
+                maxWidth={outerWidth}
+                renderer={({ key, dragHandleProps }) => {
+                  const cId = key;
+                  if (!componentMap.includes(cId)) return <div />;
 
-                const aggresultsKeys = Object.keys(aggResults)
-                  .filter((k) => k.startsWith(cId));
-                const subAggResults = {};
-                aggresultsKeys.forEach((k) => { subAggResults[k.replace(`${cId}-`, '')] = aggResults[k]; });
-                return (
-                  <div
-                    className={classes.sectionEle}
-                    key={cId}
-                  >
-                    <Paper classes={{ root: classes.componentPaper }}>
-                      <CorpusViewerComponent
-                        componentIndex={componentIndex}
-                        dragHandleProps={dragHandleProps}
-                        addComponent={this.addComponent(cId)}
-                        removeComponent={this.removeComponent(cId)}
-                        aggResults={subAggResults}
-                        updateData={this.updateGen(cId)}
-                        context={context}
-                        updateState={(newState) => dispatch(updateComponentState(cId, newState))}
-                        outerWidth={outerWidth - 40}
-                        id={cId}
-                        count={count}
-                        key={`corpus-viewer-section-component-${cId}`}
-                      />
-                    </Paper>
-                  </div>
-                );
-              }}
-            />
+                  const aggresultsKeys = Object.keys(aggResults)
+                    .filter((k) => k.startsWith(cId));
+                  const subAggResults = {};
+                  aggresultsKeys.forEach((k) => { subAggResults[k.replace(`${cId}-`, '')] = aggResults[k]; });
+                  return (
+                    <div
+                      className={classes.sectionEle}
+                      key={cId}
+                    >
+                      <Paper classes={{ root: classes.componentPaper }}>
+                        <CorpusViewerComponent
+                          componentIndex={componentIndex}
+                          dragHandleProps={dragHandleProps}
+                          addComponent={this.addComponent(cId)}
+                          removeComponent={this.removeComponent(cId)}
+                          aggResults={subAggResults}
+                          updateData={this.updateGen(cId)}
+                          context={context}
+                          updateState={(newState) => dispatch(updateComponentState(cId, newState))}
+                          outerWidth={outerWidth - 40}
+                          id={cId}
+                          count={count}
+                          key={`corpus-viewer-section-component-${cId}`}
+                        />
+                      </Paper>
+                    </div>
+                  );
+                }}
+              />
+            </Suspense>
           )}
         </WithDimensionsDirty>
       </div>
@@ -232,8 +241,9 @@ class CorpusViewerSectionComponent extends Component {
   }
 }
 
-const sectionMapStateToProps = (state) => ({
+const sectionMapStateToProps = (state, dartContext) => ({
   componentIndex: state.corpex.corpusView.componentIndex,
+  loader: dartContext.loader,
 });
 
 // eslint-disable-next-line max-len
@@ -250,6 +260,7 @@ CorpusViewerSectionComponent.propTypes = {
   count: PropTypes.number.isRequired,
   outerWidth: PropTypes.number.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  loader: PropTypes.node.isRequired,
 };
 
 class CorpusViewerComponent extends Component {
