@@ -358,6 +358,8 @@ lazy val app = ( project in file( "frontend/app" ) )
 		  "typeface-roboto" -> "0.0.75",
 		  "react-outside-click-handler" -> "^1.3.0",
 		  "react-beautiful-dnd" -> "13.0.0",
+		  "dart-ui-components" -> "file:../../../../../components/dart-ui-components-1.0.0.tgz",
+		  "dart-ui-scala13-components" -> "file:../../../../../scala13-components/dart-ui-scala13-components-1.0.0.tgz",
 	  ),
 	  npmDevDependencies in Compile ++= Seq(
 		  "html-webpack-plugin" -> "4.5.2",
