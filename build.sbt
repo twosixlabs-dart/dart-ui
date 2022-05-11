@@ -401,29 +401,74 @@ lazy val app = ( project in file( "frontend/app" ) )
    ##############################################################################################
  */
 
-// Build scala.js components and run build script to bundle with raw-js
-val assembleJs = taskKey[ Unit ]( "Build frontend and bundle with raw-js" )
 
-ProdConfig / assembleJs := {
+val buildFrontendDeps = taskKey[ Unit ]( "Build the scala2.13 and raw js dependencies of frontend scalajs code necessary for testing" )
+
+ProdConfig / buildFrontendDeps := {
+	( scala13Components / Compile / fullLinkJS ).value
+	()
+}
+ProdConfig / buildFrontendDeps := {
+	( ProdConfig / buildFrontendDeps ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend-deps.sh", "prod" ) !
+}
+
+DevConfig / buildFrontendDeps := {
+	( scala13Components / Compile / fastLinkJS ).value
+	()
+}
+DevConfig / buildFrontendDeps := {
+	( DevConfig / buildFrontendDeps ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend-deps.sh", "dev" ) !
+}
+
+buildFrontendDeps := ( DevConfig / buildFrontendDeps ).value
+
+// Run this if you want to build the frontend from scratch, including all js dependencies
+// that aren't updated frequently
+val assembleJsFull = taskKey[ Unit ]( "Build entire frontend and bundle with raw-js" )
+
+ProdConfig / assembleJsFull := {
 	( scala13Components / Compile / fullLinkJS ).value
 	( app / Compile / fullLinkJS ).value
 }
-ProdConfig / assembleJs := {
-	( ProdConfig / assembleJs ).value
-	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "prod" ) !
+ProdConfig / assembleJsFull := {
+	( ProdConfig / assembleJsFull ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh", "prod" ) !
 }
 
-DevConfig / assembleJs := {
+DevConfig / assembleJsFull := {
 	( scala13Components / Compile / fastLinkJS ).value
 	( app / Compile / fastLinkJS ).value
 }
-DevConfig / assembleJs := {
-	( DevConfig / assembleJs ).value
-	Seq( "/bin/sh", "-c", "./scripts/build-js.sh", "dev" ) !
+DevConfig / assembleJsFull := {
+	( DevConfig / assembleJsFull ).value
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh", "dev" ) !
 }
 
-assembleJs := ( DevConfig / assembleJs ).value
+assembleJsFull := ( DevConfig / assembleJsFull ).value
 
+// Run this if you want to rebundle the frontend after changing either the scalajs part or the
+// raw-js dart-ui part. (Doesn't rebuild scala2.13 part or raw components js part)
+val assembleJsMain = taskKey[ Unit ]( "Build main parts of frontend and bundle with raw-js" )
+
+ProdConfig / assembleJsMain := {
+	( app / Compile / fullLinkJS ).value
+}
+ProdConfig / assembleJsMain := {
+	( ProdConfig / assembleJsMain ).value
+	Seq( "/bin/sh", "-c", "./scripts/bundle-frontend.sh", "prod" ) !
+}
+
+DevConfig / assembleJsMain := {
+	( app / Compile / fastLinkJS ).value
+}
+DevConfig / assembleJsMain := {
+	( DevConfig / assembleJsMain ).value
+	Seq( "/bin/sh", "-c", "./scripts/bundle-frontend.sh", "dev" ) !
+}
+
+assembleJsMain := ( DevConfig / assembleJsMain ).value
 
 // Compile Application
 val compileJs = taskKey[ Unit ]( "Compile frontend components" )
@@ -452,40 +497,63 @@ DevConfig / injectConf := {
 
 injectConf := ( DevConfig / injectConf ).value
 
-// Build Application
+// Build Application and package
 val assembleApp = taskKey[ Unit ]( "Build fatjar of application" )
 
 ProdConfig / assembleApp := {
-	( ProdConfig / assembleJs ).value
+	( ProdConfig / assembleJsFull ).value
 	( server / Compile / assembly ).value
 }
 
 DevConfig / assembleApp :=  {
-	( DevConfig / assembleJs ).value
+	( DevConfig / assembleJsFull ).value
 	( server / Compile / assembly ).value
 }
 
 assembleApp := ( DevConfig / assembleApp ).value
 
-// Compile and run application
-val runApp = taskKey[ Unit ]( "Assemble js and run server to run the complete application" )
+// Compile and run application, building from scratch
+val runAppFull = taskKey[ Unit ]( "Assemble js and run server to run the complete application" )
 
-ProdConfig / runApp := {
-	( ProdConfig / assembleJs ).value
+ProdConfig / runAppFull := {
+	( ProdConfig / assembleJsFull ).value
 	( ProdConfig / injectConf ).value
 }
-ProdConfig / runApp := Def.sequential(
-	ProdConfig / runApp,
+ProdConfig / runAppFull := Def.sequential(
+	ProdConfig / runAppFull,
 	( server / Compile / run ).toTask( " -i" ),
 ).value
 
-DevConfig / runApp := {
-	( DevConfig / assembleJs ).value
+DevConfig / runAppFull := {
+	( DevConfig / assembleJsFull ).value
 	( DevConfig / injectConf ).value
 }
-DevConfig / runApp := Def.sequential(
-	DevConfig / runApp,
+DevConfig / runAppFull := Def.sequential(
+	DevConfig / runAppFull,
 	( server / Compile / run ).toTask( " -i" ),
 ).value
 
-runApp := ( DevConfig / runApp ).value
+runAppFull := ( DevConfig / runAppFull ).value
+
+// Compile and run application, only rebuilding main scala-js and raw-js dart-ui components
+val runAppMain = taskKey[ Unit ]( "Assemble js and run server to run the complete application" )
+
+ProdConfig / runAppMain := {
+	( ProdConfig / assembleJsMain ).value
+	( ProdConfig / injectConf ).value
+}
+ProdConfig / runAppMain := Def.sequential(
+	ProdConfig / runAppMain,
+	( server / Compile / run ).toTask( " -i" ),
+).value
+
+DevConfig / runAppMain := {
+	( DevConfig / assembleJsMain ).value
+	( DevConfig / injectConf ).value
+}
+DevConfig / runAppMain := Def.sequential(
+	DevConfig / runAppMain,
+	( server / Compile / run ).toTask( " -i" ),
+).value
+
+runAppMain := ( DevConfig / runAppMain ).value
