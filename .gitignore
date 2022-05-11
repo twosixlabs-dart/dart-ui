@@ -38,3 +38,5 @@ public
 
 dist
 *.tgz
+
+frontend/app-js/src/main/*
