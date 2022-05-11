@@ -15,7 +15,6 @@ else
 fi
 ls frontend/app-js/src/main/
 
-
 cd frontend/app-js || exit 1
 npm install --legacy-peer-deps || exit 1
 if [ $1="prod" ]; then
