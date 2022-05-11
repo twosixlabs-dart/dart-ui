@@ -329,8 +329,6 @@ lazy val app = ( project in file( "frontend/app" ) )
   .settings(
 	  commonSettings,
 	  testFrameworks := Seq( new TestFramework( "utest.runner.Framework" ) ),
-	  requireJsDomEnv in Test := true,
-	  scalaJSLinkerConfig ~= ( _.withModuleKind( ModuleKind.CommonJSModule ) ),
 	  libraryDependencies ++= scalaJsDom.value
 		++ scalaJsReact.value
 		++ scalaCss.value
@@ -342,8 +340,6 @@ lazy val app = ( project in file( "frontend/app" ) )
 		++ uTest.value
 		++ dartAuthCore.value
 		:+ "com.github.pathikrit" %% "better-files" % betterFilesVersion % Test,
-	  scalaJSUseMainModuleInitializer := true,
-	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
 	  npmDependencies in Compile ++= Seq(
 		  "react" -> "^17.0.2",
 		  "react-dom" -> "^17.0.2",
@@ -351,8 +347,6 @@ lazy val app = ( project in file( "frontend/app" ) )
 		  "@material-ui/core" -> "^4.11.4",
 		  "@material-ui/icons" -> "^4.11.2",
 		  "@material-ui/lab" -> "^4.0.0-alpha.56",
-		  "dart-ui-components" -> "file:../../../../../components/dart-ui-components-1.0.0.tgz",
-		  "dart-ui-scala13-components" -> "file:../../../../../scala13-components/dart-ui-scala13-components-1.0.0.tgz",
 		  "lodash" -> "^4.17.15",
 		  "keycloak-js" -> "^12.0.2",
 		  "react-pdf" -> "^4.2.0",
@@ -389,6 +383,12 @@ lazy val app = ( project in file( "frontend/app" ) )
 		  "scalajs-friendly-source-map-loader" -> "^0.1.5",
 		  "webpack" -> "^4.28.0",
 	  ),
+	  scalaJSUseMainModuleInitializer := true,
+	  requireJsDomEnv in Test := true,
+	  scalaJSLinkerConfig ~= ( _.withModuleKind( ModuleKind.CommonJSModule ) ),
+	  scalaJSLinkerConfig ~= { _.withBatchMode( true ) },
+	  additionalNpmConfig := Map( "legacy-peer-deps" -> JSON.bool( true ) ),
+	  npmExtraArgs := Seq( "--legacy-peer-deps" ),
 	  webpackConfigFile in Test := Some( baseDirectory.value / "app.config.test.js" ),
 	  webpack / version := "4.28.4",
   )
@@ -450,7 +450,7 @@ DevConfig / injectConf := {
 	Seq( s"scripts/inject-config.sh", "dev" ) !
 }
 
-injectConf := DevConfig / injectConf
+injectConf := ( DevConfig / injectConf ).value
 
 // Build Application
 val assembleApp = taskKey[ Unit ]( "Build fatjar of application" )
