@@ -25,6 +25,8 @@ const UploadItem = (props) => {
 
   const isComplete = status === 1;
 
+  const strProgress = progress ? progress.toFixed() : '';
+
   let ingestStatus = 'Uploaded';
   if (docId && docId in polledDocuments && polledDocuments[docId].status) {
     ingestStatus = polledDocuments[docId].status;
@@ -32,7 +34,7 @@ const UploadItem = (props) => {
 
   let progressBar = '';
 
-  if (progress === 100 && file.name.endsWith('.zip')) {
+  if (progress >= 100 && file.name.endsWith('.zip')) {
     progressBar = (
       <Grid item xs={12}>
         <Grid container dir="row" justifyContent="center" alignItems="center">
@@ -58,7 +60,7 @@ const UploadItem = (props) => {
           </Grid>
           <Grid item xs={1}>
             <Typography style={{ float: 'right' }}>
-              {progress}
+              {strProgress}
               %
             </Typography>
           </Grid>

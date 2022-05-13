@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import PropTypes from 'prop-types';
 
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -13,20 +13,21 @@ import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { boolTypes, componentTypes } from '../searchComponentData/enums';
-import reactLazy from '../../../../common/utilities/lazyImport';
-import LazyElement from '../../../../common/components/LazyElement';
+import AbsoluteCentered from '../../../../common/components/layout/AbsoluteCentered';
+import { connect } from '../../../../dart-ui/context/CustomConnect';
+import SearchBuilder from './SearchBuilder';
 
-const QueryStringSearch = reactLazy(import(/* webpackChunkName: "queryStringSearch" */ './queryStringSearch/QueryStringSearch'));
-const DateSearch = reactLazy(import(/* webpackChunkName: "dateSearch" */ './dateSearch/DateSearch'));
-const IntegerSearch = reactLazy(import(/* webpackChunkName: "integerSearch" */ './integerSearch/IntegerSearch'));
-const TagSearch = reactLazy(import(/* webpackChunkName: "tagSearch" */ './tagSearch/TagSearch'));
-const SearchBuilder = reactLazy(import(/* webpackChunkName: "searchBuilder" */ './SearchBuilder'));
-const TermSearch = reactLazy(import(/* webpackChunkName: "termSearch" */ './termSearch/TermSearch'));
-const FacetSearch = reactLazy(import(/* webpackChunkName: "facetSearch" */ './facetSearch/FacetSearch'));
+const QueryStringSearch = React.lazy(() => import(/* webpackChunkName: "queryStringSearch" */ './queryStringSearch/QueryStringSearch'));
+const DateSearch = React.lazy(() => import(/* webpackChunkName: "dateSearch" */ './dateSearch/DateSearch'));
+const IntegerSearch = React.lazy(() => import(/* webpackChunkName: "integerSearch" */ './integerSearch/IntegerSearch'));
+const TagSearch = React.lazy(() => import(/* webpackChunkName: "tagSearch" */ './tagSearch/TagSearch'));
+const TermSearch = React.lazy(() => import(/* webpackChunkName: "termSearch" */ './termSearch/TermSearch'));
+const FacetSearch = React.lazy(() => import(/* webpackChunkName: "facetSearch" */ './facetSearch/FacetSearch'));
 
 const styles = () => ({
   root: {
     padding: 10,
+    position: 'relative',
   },
   titleSummaryWrapper: {
     float: 'left',
@@ -58,6 +59,8 @@ const styles = () => ({
       cursor: 'pointer',
     },
   },
+  componentContent: {
+  },
   summary: {
     padding: 15,
     paddingTop: 0,
@@ -87,6 +90,7 @@ class SearchComponent extends Component {
       removeComponentCallback,
       componentIndex,
       classes,
+      loader,
     } = this.props;
 
     const childProps = type === componentTypes.BOOL_SEARCH ? {
@@ -179,36 +183,36 @@ class SearchComponent extends Component {
       switch (type) {
         case componentTypes.QUERY_STRING_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <QueryStringSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
 
         case componentTypes.DATE_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <DateSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
 
         case componentTypes.TEXT_LENGTH_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <IntegerSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
 
         case componentTypes.TERM_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <TermSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
@@ -216,9 +220,9 @@ class SearchComponent extends Component {
         case componentTypes.ENTITY_SEARCH:
         case componentTypes.EVENT_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <TagSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
@@ -226,18 +230,17 @@ class SearchComponent extends Component {
         case componentTypes.TOPIC_SEARCH:
         case componentTypes.FACTIVA_SEARCH: {
           componentContent = (
-            <LazyElement>
+            <Suspense fallback={<AbsoluteCentered>{loader}</AbsoluteCentered>}>
               <FacetSearch {...childProps} />
-            </LazyElement>
+            </Suspense>
           );
           break;
         }
 
         case componentTypes.BOOL_SEARCH: {
+          // No need to make this lazy since this will already be inside a search builder
           componentContent = (
-            <LazyElement>
-              <SearchBuilder {...childProps} />
-            </LazyElement>
+            <SearchBuilder {...childProps} />
           );
           break;
         }
@@ -251,7 +254,9 @@ class SearchComponent extends Component {
     return (
       <Paper className={`search-builder-component ${classes.root}`}>
         {componentHeader}
-        {componentContent}
+        <div className={`search-builder-component-content ${classes.componentContent}`}>
+          {componentContent}
+        </div>
       </Paper>
     );
   }
@@ -279,12 +284,18 @@ SearchComponent.propTypes = {
   componentIndex: PropTypes.objectOf(PropTypes.shape({})).isRequired,
   classes: PropTypes.shape({
     componentHeader: PropTypes.string.isRequired,
+    componentContent: PropTypes.string.isRequired,
     titleSummaryWrapper: PropTypes.string.isRequired,
     rightMenu: PropTypes.string.isRequired,
     closeButton: PropTypes.string.isRequired,
     clearDiv: PropTypes.string.isRequired,
     root: PropTypes.string.isRequired,
   }).isRequired,
+  loader: PropTypes.node.isRequired,
 };
 
-export default withStyles(styles)(SearchComponent);
+const mapStateToProps = (_, dartContext) => ({
+  loader: dartContext.loader,
+});
+
+export default connect(mapStateToProps)(withStyles(styles)(SearchComponent));

@@ -22,6 +22,7 @@ import executeSearch from '../../../searchBuilder/thunk/executeSearch.thunk';
 import WithDimensionsDirty from '../../../../../common/components/WithDimensionsDirty';
 import uuidv4 from '../../../../../common/utilities/helpers';
 import { connect } from '../../../../../dart-ui/context/CustomConnect';
+import FullSizeCentered from '../../../../../common/components/layout/FullSizeCentered';
 
 // eslint-disable-next-line arrow-body-style
 const WrappedList = React.lazy(() => {
@@ -192,11 +193,11 @@ class CorpusViewerDashboard extends Component {
 
     return (
       <WithDimensionsDirty
-        style={{ width: '100%' }}
+        style={{ width: '100%', height: 'calc(100% - 48px)' }}
         className="corpus-overview-dashboard"
       >
         {({ outerWidth }) => (
-          <Suspense fallback={loader}>
+          <Suspense fallback={<FullSizeCentered>{loader}</FullSizeCentered>}>
             <WrappedListContext
               onRearrange={(map) => {
                 Object.keys(map).forEach((key) => {
@@ -211,7 +212,7 @@ class CorpusViewerDashboard extends Component {
               }}
             >
               {(context) => (
-                <Suspense fallback={loader}>
+                <Suspense fallback={<FullSizeCentered>{loader}</FullSizeCentered>}>
                   <WrappedList
                     listId="root"
                     listClass="root"

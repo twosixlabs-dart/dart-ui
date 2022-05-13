@@ -2,6 +2,7 @@ package com.twosixtech.dart.taxonomy.explorer.frontend.app.frame.layouts.wm
 
 import com.twosixtech.dart.scalajs.layout.loading.mui.LoadingMui
 import com.twosixtech.dart.scalajs.layout.menu.tabs.{ DartTabs, DartTabsTranslation }
+import com.twosixtech.dart.scalajs.layout.types
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.DartClusterCuratorFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.layouts.wm.WmDartClusterCuratorFrameLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.frame.DartConceptExplorerFrameDI
@@ -91,12 +92,17 @@ trait WmDartAppWindowLayoutDI
         override def render( scope : Scope, conceptView : ConceptExplorerView, props : DartAppWindow.LayoutProps )
           ( implicit renderProps : Unit, context : DartContext ) : VdomElement = {
 
+            val loader = LoadingMui.LoadingCircularMui(
+                color = types.Primary,
+                size = types.Large,
+            )
+
             props.appChoice match {
                 case DartFrame.Test => <.div( "This is a test" )
-                case DartFrame.Corpex => CorpexUI.search( LoadingMui.LoadingCircularMui() )
+                case DartFrame.Corpex => CorpexUI.search( loader )
                 case DartFrame.CorpexDocument( id ) =>
-                    CorpexUI.document( id, LoadingMui.LoadingCircularMui() )
-                case DartFrame.Forklift => ForkliftUI( Some( LoadingMui.LoadingCircularMui() ) )
+                    CorpexUI.document( id, loader )
+                case DartFrame.Forklift => ForkliftUI( Some( loader ) )
                 case DartFrame.Tenants => dartTenants( DartTenants.Props().toDartProps )
                 case DartFrame.ConceptExplorer =>
                     val app = conceptView match {

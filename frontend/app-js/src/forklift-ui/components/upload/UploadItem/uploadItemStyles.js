@@ -10,7 +10,7 @@ const styles = () => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    marginRight: 8,
+    marginRight: 12,
     '& > label': {
       width: 100,
       overflow: 'hidden',

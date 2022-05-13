@@ -25,6 +25,7 @@ import NumberComponent from './dataComponents/numberComponent/NumberComponent';
 import WithDimensionsDirty from '../../../../../common/components/WithDimensionsDirty';
 import uuidv4 from '../../../../../common/utilities/helpers';
 import TagTypesCorpusViewerComponent from './dataComponents/tagTypesComponent/TagTypesCorpusViewerComponent';
+import FullSizeCentered from '../../../../../common/components/layout/FullSizeCentered';
 
 // eslint-disable-next-line arrow-body-style
 const WrappedList = React.lazy(() => {
@@ -193,7 +194,7 @@ class CorpusViewerSectionComponent extends Component {
           className="corpus-overview-dashboard"
         >
           {({ outerWidth }) => (
-            <Suspense fallback={loader}>
+            <Suspense fallback={<FullSizeCentered>{loader}</FullSizeCentered>}>
               <WrappedList
                 listId={id}
                 listClass={id}

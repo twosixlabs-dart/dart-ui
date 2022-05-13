@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 
 import PropTypes from 'prop-types';
 
-import reactLazy from '../../../../common/utilities/lazyImport';
-import LazyElement from '../../../../common/components/LazyElement';
+import FullSizeCentered from '../../../../common/components/layout/FullSizeCentered';
 import getApiData from '../thunk/getApiData.thunk';
 import { connect } from '../../../../dart-ui/context/CustomConnect';
 
-const SearchDisplay = reactLazy(import('../../searchDisplay/components/SearchDisplay'));
-const DocumentViewer = reactLazy(import('../../documentView/components/DocumentViewer'));
+const SearchDisplay = React.lazy(() => import(/* webpackChunkName: "searchDisplay" */ '../../searchDisplay/components/SearchDisplay'));
+const DocumentViewer = React.lazy(() => import(/* webpackChunkName: "documentViewer" */ '../../documentView/components/DocumentViewer'));
 
 class CorpexRoot extends Component {
   componentDidMount() {
@@ -32,12 +31,13 @@ class CorpexRoot extends Component {
       tags,
       facets,
       fields,
+      loader,
     } = this.props;
 
     if (Object.keys(tags).length === 0
       || Object.keys(facets).length === 0
       || Object.keys(fields).length === 0) {
-      return <div>Loading</div>;
+      return <FullSizeCentered>{loader}</FullSizeCentered>;
     }
 
     const {
@@ -47,16 +47,16 @@ class CorpexRoot extends Component {
 
     if (docView) {
       return (
-        <LazyElement>
+        <Suspense fallback={<FullSizeCentered>{loader}</FullSizeCentered>}>
           <DocumentViewer documentId={documentId} />
-        </LazyElement>
+        </Suspense>
       );
     }
 
     return (
-      <LazyElement>
+      <Suspense fallback={<FullSizeCentered>{loader}</FullSizeCentered>}>
         <SearchDisplay />
-      </LazyElement>
+      </Suspense>
     );
   }
 }
@@ -69,6 +69,7 @@ CorpexRoot.propTypes = {
   fields: PropTypes.shape({}).isRequired,
   dispatch: PropTypes.func.isRequired,
   xhrHandler: PropTypes.func.isRequired,
+  loader: PropTypes.func.isRequired,
 };
 
 CorpexRoot.defaultProps = {
@@ -81,6 +82,7 @@ function mapStateToProps(state, dartContext) {
     facets: state.corpex.corpexRoot.facets,
     fields: state.corpex.corpexRoot.fields,
     xhrHandler: dartContext.xhrHandler,
+    loader: dartContext.loader,
   };
 }
 

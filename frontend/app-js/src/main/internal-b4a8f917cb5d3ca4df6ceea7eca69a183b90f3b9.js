@@ -1,8 +1,0 @@
-'use strict';
-var $j_internal$002db28b7af69320201d1cf206ebf28373980add1451 = require("./internal-b28b7af69320201d1cf206ebf28373980add1451.js");
-var $j_internal$002dd86447bb7e31197698d2686ff468680c3eec5b90 = require("./internal-d86447bb7e31197698d2686ff468680c3eec5b90.js");
-function $s_Lcom_twosixtech_dart_taxonomy_explorer_frontend_app_frame_layouts_wm_CorpexUI$$anon$2__dynamicImport$__O() {
-  return $j_internal$002dd86447bb7e31197698d2686ff468680c3eec5b90.$m_Lcom_twosixtech_dart_taxonomy_explorer_frontend_app_frame_layouts_wm_CorpexUIDynamic$().search__Ljapgolly_scalajs_react_component_Js$UnmountedWithRoot()
-}
-exports.$s_Lcom_twosixtech_dart_taxonomy_explorer_frontend_app_frame_layouts_wm_CorpexUI$$anon$2__dynamicImport$__O = $s_Lcom_twosixtech_dart_taxonomy_explorer_frontend_app_frame_layouts_wm_CorpexUI$$anon$2__dynamicImport$__O;
-//# sourceMappingURL=internal-b4a8f917cb5d3ca4df6ceea7eca69a183b90f3b9.js.map

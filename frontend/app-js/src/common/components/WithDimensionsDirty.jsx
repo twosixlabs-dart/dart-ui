@@ -12,6 +12,7 @@ function WithDimensionsDirty(props) {
     className,
     setHeight,
     setWidth,
+    style,
   } = props;
   const outerRef = useRef(null);
   const [outerHeight, setOuterHeight] = useState(0);
@@ -55,7 +56,7 @@ function WithDimensionsDirty(props) {
   }, []);
 
   return (
-    <div ref={outerRef} className={className}>
+    <div ref={outerRef} className={className} style={style}>
       {children({ outerHeight, outerWidth })}
     </div>
   );
@@ -66,12 +67,14 @@ WithDimensionsDirty.propTypes = {
   className: PropTypes.string,
   setHeight: PropTypes.func,
   setWidth: PropTypes.func,
+  style: PropTypes.shape({}),
 };
 
 WithDimensionsDirty.defaultProps = {
   className: null,
   setHeight: () => {},
   setWidth: () => {},
+  style: {},
 };
 
 export default WithDimensionsDirty;

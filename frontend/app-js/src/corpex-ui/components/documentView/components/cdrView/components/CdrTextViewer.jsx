@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 
 // eslint-disable-next-line import/no-unresolved,import/no-webpack-loader-syntax,import/extensions
-import Worker from 'worker-loader!../workers/textProcessor.worker.js';
+import Worker from '../workers/textProcessor.worker.js';
 
 import CdrTextItem from './CdrTextItem';
 import { completeScrollTo, completeScrollToIndex, setCdrTextArray } from '../cdrView.actions';

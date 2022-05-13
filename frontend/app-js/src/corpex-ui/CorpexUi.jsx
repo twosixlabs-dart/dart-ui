@@ -11,6 +11,7 @@ import { chooseTenant } from '../dart-ui/redux/actions/dart.actions';
 const styles = () => ({
   container: {
     padding: 0,
+    height: '100%',
   },
 });
 

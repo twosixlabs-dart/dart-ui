@@ -1,8 +1,0 @@
-{
-"version": 3,
-"file": "internal-b4a8f917cb5d3ca4df6ceea7eca69a183b90f3b9.js",
-"mappings": ";;;AA4DkE,SAAAA,2GAAA;EACtC,OAAhBC,wDAAA,CAAA,wFAAA,EAAgB,CAAA,8DAAA,EADsC;C;AAAA,OAAA,CAAA,2GAAA,GAAAD,2G;",
-"sources": ["file:///Users/john.hungerford/projects/dart/OSS/user-interface/dart-ui/frontend/app/src/main/scala/com/twosixtech/dart/taxonomy/explorer/frontend/app/frame/layouts/wm/WmDartAppWindowLayoutDI.scala"],
-"names": ["dynamicImport$", "internal-d86447bb7e31197698d2686ff468680c3eec5b90"],
-"lineCount": 7
-}
