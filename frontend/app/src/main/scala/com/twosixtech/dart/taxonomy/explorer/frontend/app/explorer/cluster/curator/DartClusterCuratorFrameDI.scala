@@ -1,7 +1,8 @@
 package com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator
 
-import com.twosixtech.dart.scalajs.backend.HttpBody.{BinaryBody, NoBody, TextBody}
-import com.twosixtech.dart.scalajs.backend.{BackendClient, HttpMethod, HttpRequest, HttpResponse, XhrLocalErrorEvent, XhrNetworkErrorEvent}
+import com.twosixlabs.dart.auth.tenant.{ CorpusTenant, DartTenant, GlobalCorpus }
+import com.twosixtech.dart.scalajs.backend.HttpBody.{ BinaryBody, NoBody, TextBody }
+import com.twosixtech.dart.scalajs.backend.{ BackendClient, HttpBody, HttpMethod, HttpRequest, HttpResponse, XhrLocalErrorEvent, XhrNetworkErrorEvent }
 import com.twosixtech.dart.scalajs.control.PollHandler
 import com.twosixtech.dart.scalajs.control.PollHandler.PollContext
 import com.twosixtech.dart.taxonomy.explorer.api.ClusteringApiDI
@@ -10,15 +11,15 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.DartConceptEx
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.concept.DartConceptFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit.DartCircuitDeps
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.{DartComponentDI, DartStateDI}
-import com.twosixtech.dart.taxonomy.explorer.models.{Cluster, CuratedClusterDI, DartConceptDeps, DartTaxonomyDI}
-import com.twosixtech.dart.taxonomy.explorer.serialization.{DartSerializationDeps, WmDartSerializationDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.{ DartComponentDI, DartStateDI }
+import com.twosixtech.dart.taxonomy.explorer.models.{ Cluster, CuratedClusterDI, DartConceptDeps, DartTaxonomyDI }
+import com.twosixtech.dart.taxonomy.explorer.serialization.{ DartSerializationDeps, WmDartSerializationDI }
 import japgolly.scalajs.react.Callback
-import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
+import japgolly.scalajs.react.vdom.{ VdomElement, VdomNode }
 import org.scalajs.dom.window
 
 import java.util.UUID
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 trait DartClusterCuratorFrameDI {
     this : DartComponentDI
@@ -148,6 +149,32 @@ trait DartClusterCuratorFrameDI {
                         case InitialClusterPending => None
                         case ClusterComplete( _, jobId, _, _ ) => jobId.map( _.toString )
                         case ReclusterPending( _, jobId, _ ) => Some( jobId.toString )
+                    }
+
+                    val startDiscovery : String => Callback = ( tenantId ) => {
+                        import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+                        Callback(
+                            stateContext.backendContext.authClient.submit(
+                                HttpMethod.Post,
+                                HttpRequest(
+                                    ClusteringApi.discoverEndpoint + "/" + tenantId.trim,
+                                    Map.empty,
+                                    HttpBody.NoBody,
+                                )
+                            ) onComplete {
+                                case Success( HttpResponse( _, 200, TextBody( id ) ) ) =>
+                                    ( stateContext.dispatch( ClearClusterState ) >>
+                                      loader.startAs( loadId ) >>
+                                      pollfn( stateContext.backendContext.authClient, None, resHandler, failHandler ) )
+                                        .runNow()
+                                case Success( other ) =>
+                                    stateContext.report
+                                      .logMessage( "Unable to start discovery", s"Unrecognized response from reclustering submission: ${other}" )
+                                case Failure( e ) =>
+                                    failHandler( e ).runNow()
+                            }
+                        )
                     }
 
                     def getJobResults( id : String, setJobIdTo : Option[ UUID ] = None ) : Callback = {
@@ -325,6 +352,11 @@ trait DartClusterCuratorFrameDI {
                             jobId = jobId,
                             getJobResults = jid => getJobResults( jid ),
                             clusters = clusters,
+                            tenants = stateContext.tenants.toList map {
+                                case GlobalCorpus => DartTenant.globalId
+                                case CorpusTenant( id, _ ) => id
+                            },
+                            startDiscovery = startDiscovery,
                             reclusterButtonDisabled = reclusterButtonDisabled,
                             recluster = recluster,
                             rescoreButtonDisabled = rescoreButtonDisabled,
@@ -354,6 +386,8 @@ trait DartClusterCuratorFrameDI {
             jobId : Option[ String ],
             getJobResults : String => Callback,
             clusters : Option[ Vector[ CuratedCluster ] ],
+            tenants : List[ String ],
+            startDiscovery : String => Callback,
             reclusterButtonDisabled : Boolean,
             recluster : () => Callback,
             rescoreButtonDisabled : Boolean,

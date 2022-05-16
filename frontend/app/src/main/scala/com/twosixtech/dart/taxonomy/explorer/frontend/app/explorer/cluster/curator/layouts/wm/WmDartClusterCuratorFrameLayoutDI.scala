@@ -4,11 +4,13 @@ import com.twosixtech.dart.scalajs.layout.button.iconbutton.IconButton
 import com.twosixtech.dart.scalajs.layout.button.iconbutton.mui.IconButtonMui
 import com.twosixtech.dart.scalajs.layout.button.regular.Button
 import com.twosixtech.dart.scalajs.layout.button.regular.mui.ButtonMui
-import com.twosixtech.dart.scalajs.layout.div.flex.{DartFlex, DartFlexBasic}
-import com.twosixtech.dart.scalajs.layout.div.splitscreen.{SplitScreen, SplitScreenMui}
-import com.twosixtech.dart.scalajs.layout.form.textinput.{TextInput, TextInputMui}
+import com.twosixtech.dart.scalajs.layout.div.flex.{ DartFlex, DartFlexBasic }
+import com.twosixtech.dart.scalajs.layout.div.splitscreen.{ SplitScreen, SplitScreenMui }
+import com.twosixtech.dart.scalajs.layout.form.select.Select
+import com.twosixtech.dart.scalajs.layout.form.select.mui.SelectMui
+import com.twosixtech.dart.scalajs.layout.form.textinput.{ TextInput, TextInputMui }
 import com.twosixtech.dart.scalajs.layout.icon.Icons.SyncIconMui
-import com.twosixtech.dart.scalajs.layout.text.{Text, TextMui}
+import com.twosixtech.dart.scalajs.layout.text.{ Text, TextMui }
 import com.twosixtech.dart.scalajs.layout.types
 import com.twosixtech.dart.taxonomy.explorer.api.ClusteringApiDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.DartLoadingDI
@@ -17,13 +19,13 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.interfa
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.DartConceptExplorerDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.cluster.layouts.wm.WmDartClusterCuratorClusterLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.layouts.DartClusterCuratorNavigationLayoutDI
-import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.{DartClusterCuratorDI, DartClusterCuratorFrameLayoutDeps}
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.{ DartClusterCuratorDI, DartClusterCuratorFrameLayoutDeps }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.concept.DartConceptFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.concept.layouts.wm.WmDartConceptFrameLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit.DartCircuitDeps
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.{DartComponentDI, DartStateDI}
-import com.twosixtech.dart.taxonomy.explorer.models.{CuratedClusterDI, DartConceptDeps, DartTaxonomyDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.{ DartComponentDI, DartStateDI }
+import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartConceptDeps, DartTaxonomyDI }
 import com.twosixtech.dart.taxonomy.explorer.serialization.WmDartSerializationDI
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
@@ -159,6 +161,20 @@ trait WmDartClusterCuratorFrameLayoutDI
                             items = Styles.horizSpaced.cName,
                         ),
                         items = Vector(
+                            DartFlex.FlexItem(
+                                SelectMui.StringSelectMui(
+                                    value = "Discover Concepts",
+                                    items = props.tenants.map( tenantId => {
+                                        Select.Item[ String ](
+                                            tenantId,
+                                            tenantId,
+                                            Some( tenantId ),
+                                        )
+                                    } ).toVector,
+                                    onChange = ( tenantId : String ) =>
+                                        props.startDiscovery( tenantId ),
+                                ),
+                            ),
                             DartFlex.FlexItem(
                                 ButtonMui( Button.Props(
                                     "Recluster",
