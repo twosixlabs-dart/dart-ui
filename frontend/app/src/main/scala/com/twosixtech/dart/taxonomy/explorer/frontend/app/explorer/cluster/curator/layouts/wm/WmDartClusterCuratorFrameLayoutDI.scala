@@ -4,11 +4,13 @@ import com.twosixtech.dart.scalajs.layout.button.iconbutton.IconButton
 import com.twosixtech.dart.scalajs.layout.button.iconbutton.mui.IconButtonMui
 import com.twosixtech.dart.scalajs.layout.button.regular.Button
 import com.twosixtech.dart.scalajs.layout.button.regular.mui.ButtonMui
-import com.twosixtech.dart.scalajs.layout.div.flex.{DartFlex, DartFlexBasic}
-import com.twosixtech.dart.scalajs.layout.div.splitscreen.{SplitScreen, SplitScreenMui}
-import com.twosixtech.dart.scalajs.layout.form.textinput.{TextInput, TextInputMui}
+import com.twosixtech.dart.scalajs.layout.div.flex.{ DartFlex, DartFlexBasic }
+import com.twosixtech.dart.scalajs.layout.div.splitscreen.{ SplitScreen, SplitScreenMui }
+import com.twosixtech.dart.scalajs.layout.form.select.Select
+import com.twosixtech.dart.scalajs.layout.form.select.mui.SelectMui
+import com.twosixtech.dart.scalajs.layout.form.textinput.{ TextInput, TextInputMui }
 import com.twosixtech.dart.scalajs.layout.icon.Icons.SyncIconMui
-import com.twosixtech.dart.scalajs.layout.text.{Text, TextMui}
+import com.twosixtech.dart.scalajs.layout.text.{ Text, TextMui }
 import com.twosixtech.dart.scalajs.layout.types
 import com.twosixtech.dart.taxonomy.explorer.api.ClusteringApiDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.DartLoadingDI
@@ -17,14 +19,16 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.app.common.loading.interfa
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.DartConceptExplorerDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.cluster.layouts.wm.WmDartClusterCuratorClusterLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.layouts.DartClusterCuratorNavigationLayoutDI
-import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.{DartClusterCuratorDI, DartClusterCuratorFrameLayoutDeps}
+import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.cluster.curator.{ DartClusterCuratorDI, DartClusterCuratorFrameLayoutDeps }
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.concept.DartConceptFrameDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.app.explorer.concept.layouts.wm.WmDartConceptFrameLayoutDI
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.circuit.DartCircuitDeps
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDeps
-import com.twosixtech.dart.taxonomy.explorer.frontend.base.{DartComponentDI, DartStateDI}
-import com.twosixtech.dart.taxonomy.explorer.models.{CuratedClusterDI, DartConceptDeps, DartTaxonomyDI}
+import com.twosixtech.dart.taxonomy.explorer.frontend.base.{ DartComponentDI, DartStateDI }
+import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartConceptDeps, DartTaxonomyDI }
 import com.twosixtech.dart.taxonomy.explorer.serialization.WmDartSerializationDI
+import japgolly.scalajs.react.Callback
+import japgolly.scalajs.react.CallbackTo.confirm
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -94,6 +98,11 @@ trait WmDartClusterCuratorFrameLayoutDI
                 val leftOuter = style( fullHeight, overflow.hidden )
                 val leftInner = style( fullHeight, overflow.hidden, paddingRight( 10 px ), paddingBottom( 1 px ) )
                 val right = style( fullHeight, overflow.hidden )
+
+                val dangerousDropdown = style(
+                    paddingLeft( 5.px ),
+                    backgroundColor( red )
+                )
             }
             Styles.addToDocument()
 
@@ -136,7 +145,6 @@ trait WmDartClusterCuratorFrameLayoutDI
 
             <.div(
                 ^.style := js.Dictionary(
-                    "position" -> "relative",
                     "display" -> "flex",
                     "flexFlow" -> "column",
                     "height" -> "100%",
@@ -159,6 +167,31 @@ trait WmDartClusterCuratorFrameLayoutDI
                             items = Styles.horizSpaced.cName,
                         ),
                         items = Vector(
+                            DartFlex.FlexItem(
+                                SelectMui.StringSelectMui(
+                                    value = "* * * * *",
+                                    items = ( Select.Item[ String ](
+                                        "Discover Concepts",
+                                        "* * * * *",
+                                        Some( "* * * * *" ),
+                                    ) +: props.tenants.map( tenantId => {
+                                        Select.Item[ String ](
+                                            tenantId,
+                                            tenantId,
+                                            Some( tenantId ),
+                                        )
+                                    } ) ).toVector,
+                                    onChange = ( tenantId : String ) =>
+                                      for {
+                                          confirmed <- confirm(
+                                              s"WARNING: this will reseed the clustering service with concepts pulled from documents in $tenantId, erasing all clustering data. Are you sure you wish to proceed?"
+                                          )
+                                          _ <- if ( confirmed ) props.startDiscovery( tenantId )
+                                               else Callback()
+                                      } yield (),
+                                    classes = Select.Classes( Styles.dangerousDropdown.cName ),
+                                ),
+                            ),
                             DartFlex.FlexItem(
                                 ButtonMui( Button.Props(
                                     "Recluster",
@@ -226,14 +259,18 @@ trait WmDartClusterCuratorFrameLayoutDI
                     ) )
                 ),
                 <.div(
-                    ^.style := js.Dictionary( "flex" -> "1", "overflow" -> "auto" ),
+                    ^.style := js.Dictionary(
+                        "position" -> "relative",
+                        "flex" -> "1",
+                        "overflow" -> "auto",
+                    ),
                     ( if ( props.clusterPending ) EmptyVdom
                     else clustersEle ),
+                    dartLoadingInterface( DartLoadingInterface.Props(
+                        props.loadingState,
+                        DartLoadingInterface.LightOverlay,
+                    ).toDartPropsRC() )
                 ),
-                dartLoadingInterface( DartLoadingInterface.Props(
-                    props.loadingState,
-                    DartLoadingInterface.LightOverlay,
-                ).toDartPropsRC() )
             )
         }
 

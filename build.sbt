@@ -436,7 +436,7 @@ ProdConfig / assembleJsFull := {
 }
 ProdConfig / assembleJsFull := {
 	( ProdConfig / assembleJsFull ).value
-	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh", "prod" ) !
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh prod" ) !
 }
 
 DevConfig / assembleJsFull := {
@@ -445,7 +445,7 @@ DevConfig / assembleJsFull := {
 }
 DevConfig / assembleJsFull := {
 	( DevConfig / assembleJsFull ).value
-	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh", "dev" ) !
+	Seq( "/bin/sh", "-c", "./scripts/build-frontend.sh dev" ) !
 }
 
 assembleJsFull := ( DevConfig / assembleJsFull ).value

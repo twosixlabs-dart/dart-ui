@@ -4,10 +4,11 @@
 ## built using `build-raw-js.sh`
 
 echo "Bundling Frontend"
-echo $PWD
+echo "$0 $1"
 
 rm frontend/app-js/src/main/*
 echo "Copying scala.js artifacts to app-js"
+mkdir -p frontend/app-js/src/main
 if [[ $1 == "prod" ]]; then
   echo "Copying prod scalajs artifacts"
   ls frontend/app/target/scala-2.12/app-opt/
