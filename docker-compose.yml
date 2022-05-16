@@ -126,11 +126,12 @@ services:
       - CLUSTERING_SERVER_ENABLED=true
       - CLUSTERING_HOST=http://afrl402.bbn.com
       - CLUSTERING_PORT=5061
-      - POSTGRES_HOST=postgres
+      - POSTGRES_HOST=dart-postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=dart
       - POSTGRES_PASSWORD=dart_pass
       - POSTGRES_DATABASE=dart_db
+      - ARANGODB_HOST=dart-arangodb
 
   dart-tenants:
     image: twosixlabsdart/dart-tenants:latest

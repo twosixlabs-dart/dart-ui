@@ -20,12 +20,14 @@ function WithDimensionsDirty(props) {
 
   const getSizeAndSet = () => {
     if (outerRef !== null && outerRef.current) {
-      const style = getComputedStyle(outerRef.current);
+      const computedStyle = getComputedStyle(outerRef.current);
       const totalHeight = outerRef.current.clientHeight;
-      const paddingHeight = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const paddingHeight = parseFloat(computedStyle.paddingTop)
+        + parseFloat(computedStyle.paddingBottom);
       const newHeight = totalHeight - paddingHeight;
       const totalWidth = outerRef.current.clientWidth;
-      const paddingWidth = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const paddingWidth = parseFloat(computedStyle.paddingLeft)
+        + parseFloat(computedStyle.paddingRight);
       const newWidth = totalWidth - paddingWidth;
       if (newHeight !== outerHeight) {
         setOuterHeight(newHeight);

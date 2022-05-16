@@ -1,7 +1,9 @@
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
+import akka.event.Logging.LogLevel
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
+import akka.stream.Attributes.LogLevels
 import better.files.Resource
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.twosixlabs.dart.arangodb.{ Arango, ArangoConf }
@@ -19,6 +21,7 @@ import com.twosixtech.dart.taxonomy.explorer.models.wm.WmDartClusterConceptBridg
 import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartClusterDI, DartTaxonomyDI, UUIDTaxonomyIdDI, UUIDTaxonomyIdSerializationDI, WmDartConceptDI }
 import com.twosixtech.dart.taxonomy.explorer.provider.KafkaProvider
 import com.twosixtech.dart.taxonomy.explorer.publication.OntologyRegistryOntologyPublicationServiceDI
+import com.twosixtech.dart.taxonomy.explorer.routes.utilities.RouteLogging
 import com.twosixtech.dart.taxonomy.explorer.routes.{ AuthRouterDI, ClusterRoutesDI, OntologyOutputRouteDI, OntologyPublicationRoutesDI, StateAccessRoutesDI, StaticRoutes, TaxonomyRoutesDI, UserDataRoutesDI }
 import com.twosixtech.dart.taxonomy.explorer.serialization.{ OntologyReaderDI, WmDartSerializationDI, WmOntologyWriterDI }
 import com.twosixtech.dart.taxonomy.explorer.userdata.VersionedUserDataStore
@@ -172,15 +175,17 @@ object Main
         lazy val userDataRoutes =
             new UserDataRoutes[ String ]( dartUiUserDataStore, v => v, v => v ).route
 
+        val routes = stateAccessRoutes ~
+          userDataRoutes ~
+          ontologyPublicationRoutes ~
+          ontologyOutputRoute ~
+          clusterRoute ~
+          taxonomyRoute ~
+          staticRoute
+
         val bindingFuture = Http()
           .newServerAt( "0.0.0.0", 8080 )
-          .bind( stateAccessRoutes ~
-                userDataRoutes ~
-                ontologyPublicationRoutes ~
-                ontologyOutputRoute ~
-                clusterRoute ~
-                taxonomyRoute ~
-                staticRoute )
+          .bind( RouteLogging.logRequestResult( LogLevels.Info, routes ) )
 
         println( s"Server online at http://0.0.0.0:8080/" )
         if ( args.map( _.trim ).contains( "-i" ) ) {

@@ -27,6 +27,8 @@ import com.twosixtech.dart.taxonomy.explorer.frontend.base.context.DartContextDe
 import com.twosixtech.dart.taxonomy.explorer.frontend.base.{ DartComponentDI, DartStateDI }
 import com.twosixtech.dart.taxonomy.explorer.models.{ CuratedClusterDI, DartConceptDeps, DartTaxonomyDI }
 import com.twosixtech.dart.taxonomy.explorer.serialization.WmDartSerializationDI
+import japgolly.scalajs.react.Callback
+import japgolly.scalajs.react.CallbackTo.confirm
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -96,6 +98,11 @@ trait WmDartClusterCuratorFrameLayoutDI
                 val leftOuter = style( fullHeight, overflow.hidden )
                 val leftInner = style( fullHeight, overflow.hidden, paddingRight( 10 px ), paddingBottom( 1 px ) )
                 val right = style( fullHeight, overflow.hidden )
+
+                val dangerousDropdown = style(
+                    paddingLeft( 5.px ),
+                    backgroundColor( red )
+                )
             }
             Styles.addToDocument()
 
@@ -138,7 +145,6 @@ trait WmDartClusterCuratorFrameLayoutDI
 
             <.div(
                 ^.style := js.Dictionary(
-                    "position" -> "relative",
                     "display" -> "flex",
                     "flexFlow" -> "column",
                     "height" -> "100%",
@@ -163,16 +169,27 @@ trait WmDartClusterCuratorFrameLayoutDI
                         items = Vector(
                             DartFlex.FlexItem(
                                 SelectMui.StringSelectMui(
-                                    value = "Discover Concepts",
-                                    items = props.tenants.map( tenantId => {
+                                    value = "* * * * *",
+                                    items = ( Select.Item[ String ](
+                                        "Discover Concepts",
+                                        "* * * * *",
+                                        Some( "* * * * *" ),
+                                    ) +: props.tenants.map( tenantId => {
                                         Select.Item[ String ](
                                             tenantId,
                                             tenantId,
                                             Some( tenantId ),
                                         )
-                                    } ).toVector,
+                                    } ) ).toVector,
                                     onChange = ( tenantId : String ) =>
-                                        props.startDiscovery( tenantId ),
+                                      for {
+                                          confirmed <- confirm(
+                                              s"WARNING: this will reseed the clustering service with concepts pulled from documents in $tenantId, erasing all clustering data. Are you sure you wish to proceed?"
+                                          )
+                                          _ <- if ( confirmed ) props.startDiscovery( tenantId )
+                                               else Callback()
+                                      } yield (),
+                                    classes = Select.Classes( Styles.dangerousDropdown.cName ),
                                 ),
                             ),
                             DartFlex.FlexItem(
@@ -242,14 +259,18 @@ trait WmDartClusterCuratorFrameLayoutDI
                     ) )
                 ),
                 <.div(
-                    ^.style := js.Dictionary( "flex" -> "1", "overflow" -> "auto" ),
+                    ^.style := js.Dictionary(
+                        "position" -> "relative",
+                        "flex" -> "1",
+                        "overflow" -> "auto",
+                    ),
                     ( if ( props.clusterPending ) EmptyVdom
                     else clustersEle ),
+                    dartLoadingInterface( DartLoadingInterface.Props(
+                        props.loadingState,
+                        DartLoadingInterface.LightOverlay,
+                    ).toDartPropsRC() )
                 ),
-                dartLoadingInterface( DartLoadingInterface.Props(
-                    props.loadingState,
-                    DartLoadingInterface.LightOverlay,
-                ).toDartPropsRC() )
             )
         }
 

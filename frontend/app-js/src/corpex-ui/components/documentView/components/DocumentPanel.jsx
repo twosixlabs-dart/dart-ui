@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 // import RawDocViewer from './RawDocViewer';
 import FullSizeCentered from '../../../../common/components/layout/FullSizeCentered';
 
-
 const CdrViewer = React.lazy(() => import(/* webpackChunkName: "cdrViewer" */'./cdrView/components/CdrViewer'));
 const PdfViewer = React.lazy(() => import(/* webpackChunkName: "pdfViewer" */'./rawView/components/PdfViewer'));
 
