@@ -17,9 +17,7 @@ trait ClusteringServiceDeps[ JobID ] {
       with ClusteringApiDI =>
 
     trait ClusteringService {
-        def discover( tenant : String ) : Future[ JobID ]
-
-        def discoveryResults( jobId : JobID ) : Future[ ClusteringApi.DiscoveryResults ]
+        def initialClustering( tenant : String ) : Future[ Unit ]
 
         def recluster( omittedConcepts : Set[ String ], taxonomy : DartTaxonomy, prevJob : Option[ JobID ] ) : Future[ JobID ]
 
@@ -119,24 +117,10 @@ trait TestClusteringServiceDI
             }
         }
 
-        override def discover(
+        override def initialClustering(
             tenant: String
-        ): Future[ UUID ] = Future.successful {
-            UUID.randomUUID()
-        }
+        ): Future[ Unit ] = Future.successful()
 
-        override def discoveryResults(
-            jobId: UUID
-        ): Future[ ClusteringApi.DiscoveryResults ] = Future.successful {
-            val words1 = 0 to 10 map ( _ => r.nextString( 5 ) )
-            val words2 = 0 to 10 map ( _ => r.nextString( 5 ) )
-
-            ClusteringApi.DiscoveryResults(
-                words1,
-                "test-ontology-yml",
-                words2,
-            )
-        }
     }
 
 }

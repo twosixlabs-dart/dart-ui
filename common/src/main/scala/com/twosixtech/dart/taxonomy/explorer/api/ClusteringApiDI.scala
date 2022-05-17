@@ -23,7 +23,7 @@ trait ClusteringApiDI {
         def RECLUSTER_PATH : String = PATH + "/recluster"
         def RESCORE_PATH : String = PATH + "/rescore"
 
-        def discoverEndpoint : String = PATH + "/discover"
+        def initialClusteringEndpoint : String = PATH + "/initial"
 
         def reclusterSubmitEndpoint : String = RECLUSTER_PATH + "/submit"
         def rescoreSubmitEndpoint : String = RESCORE_PATH + "/submit"
