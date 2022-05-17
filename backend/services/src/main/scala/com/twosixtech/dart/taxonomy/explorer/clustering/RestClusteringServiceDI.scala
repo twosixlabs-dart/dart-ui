@@ -148,7 +148,13 @@ trait RestClusteringServiceDI
         override def recluster( omittedConcepts : Set[ String ], taxonomy : DartTaxonomy, prevJob : Option[ UUID ] ) : Future[ UUID ] = {
             val taxonomyYml = OntologyWriter.taxonomyYaml( taxonomy )
 
-            clusteringClient.recluster( omittedConcepts.toSeq, taxonomyYml, Job( prevJob.getOrElse( DEFAULT_JOB_ID ).toString ) )
+            clusteringClient
+              .recluster(
+                  omittedConcepts.toSeq, taxonomyYml, Job( prevJob
+                    .getOrElse( DEFAULT_JOB_ID )
+                    .toString
+                  )
+              )
               .map( v => UUID.fromString( v.id ) )
         }
 
@@ -159,10 +165,11 @@ trait RestClusteringServiceDI
               .map( v => {
                   val uuid = UUID.fromString( v.id )
                   uuid
-              } )
+              }
+              )
         }
 
-        override def rescoreResults( jobId : Option[ UUID ] ) : Future[ ClusteringApi.ClusterResults ] =  {
+        override def rescoreResults( jobId : Option[ UUID ] ) : Future[ ClusteringApi.ClusterResults ] = {
             val job = jobId.getOrElse( DEFAULT_JOB_ID )
 
             for {
@@ -183,34 +190,10 @@ trait RestClusteringServiceDI
             } yield finalResult
         }
 
-        override def discover(
-            tenant: String
-        ): Future[ UUID ] = {
-            clusteringClient.discovery( tenant )
-              .map( v => UUID.fromString( v.id ) )
-        }
-
-        override def discoveryResults(
-            jobId: UUID
-        ): Future[ ClusteringApi.DiscoveryResults ] = {
-            for {
-                pollRes <- clusteringClient.pollDiscovery( Job( jobId.toString ) )
-                finalResult <- pollRes match {
-                    case DartClusteringClient.Pending =>
-                        Future.failed( new Exception( "NO RESULTS" ) )
-                    case DartClusteringClient.Failed( message ) =>
-                        Future.failed( new Exception( message ) )
-                    case DartClusteringClient.Succeeded =>
-                        clusteringClient.discoveryResults( Job( jobId.toString ) ) map { res =>
-                            ClusteringApi.DiscoveryResults(
-                                res.allowedWords,
-                                res.ontologyMetadata,
-                                res.relevantDocs,
-                            )
-                        }
-                }
-            } yield finalResult
+        override def initialClustering(
+            tenant : String
+        ) : Future[ Unit ] = {
+            clusteringClient.initialClustering( tenant )
         }
     }
-
 }

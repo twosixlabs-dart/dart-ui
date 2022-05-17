@@ -35,10 +35,10 @@ trait ClusterRoutesDI {
 
         import ClusteringApi._
 
-        private def postDiscoveryRoute( tenantId : String ) : Route = post {
-            onComplete( ClusteringService.discover( tenantId ) ) {
-                case Success( id ) =>
-                    complete( status = 200, Nil, id.toString )
+        private def postInitialClustering( tenantId : String ) : Route = post {
+            onComplete( ClusteringService.initialClustering( tenantId ) ) {
+                case Success( _ ) =>
+                    complete( status = 200, Nil, "" )
                 case Failure( e ) =>
                     complete( status = 500, Nil, e.getMessage )
             }
@@ -101,9 +101,9 @@ trait ClusterRoutesDI {
             }
         }
 
-        private lazy val discoverRoute = rawPathPrefix( discoverEndpoint.pathMatch ) {
+        private lazy val initialClusteringRoute = rawPathPrefix( initialClusteringEndpoint.pathMatch ) {
             path( Segment ) { tenantId : String =>
-                AuthRouter.authRoute { _ => postDiscoveryRoute( tenantId ) }
+                AuthRouter.authRoute { _ => postInitialClustering( tenantId ) }
             }
         }
 
@@ -141,7 +141,7 @@ trait ClusterRoutesDI {
         }
 
         def route : Route = {
-            discoverRoute ~
+            initialClusteringRoute ~
               reclusterResultsRoute ~
               rescoreResultsRoute ~ reclusterSubmitRoute ~
               rescoreSubmitRoute

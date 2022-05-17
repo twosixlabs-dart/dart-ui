@@ -158,12 +158,12 @@ trait DartClusterCuratorFrameDI {
                             stateContext.backendContext.authClient.submit(
                                 HttpMethod.Post,
                                 HttpRequest(
-                                    ClusteringApi.discoverEndpoint + "/" + tenantId.trim,
+                                    ClusteringApi.initialClusteringEndpoint + "/" + tenantId.trim,
                                     Map.empty,
                                     HttpBody.NoBody,
                                 )
                             ) onComplete {
-                                case Success( HttpResponse( _, 200, TextBody( id ) ) ) =>
+                                case Success( HttpResponse( _, 200, TextBody( _ ) ) ) =>
                                     ( stateContext.dispatch( ClearClusterState ) >>
                                       loader.startAs( loadId ) >>
                                       pollfn( stateContext.backendContext.authClient, None, resHandler, failHandler ) )
@@ -171,6 +171,7 @@ trait DartClusterCuratorFrameDI {
                                 case Success( other ) =>
                                     stateContext.report
                                       .logMessage( "Unable to start discovery", s"Unrecognized response from reclustering submission: ${other}" )
+                                      .runNow()
                                 case Failure( e ) =>
                                     failHandler( e ).runNow()
                             }
