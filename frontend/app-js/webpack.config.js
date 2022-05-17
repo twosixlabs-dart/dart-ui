@@ -1,14 +1,16 @@
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
+const publicDir = path.join(__dirname, '../../public/')
 
 module.exports = (env, { mode }) => ({
   entry: {
     app: path.resolve(__dirname, 'src/main/main.js'),
   },
   output: {
-    path: path.join(__dirname, '../../public/'),
+    path: publicDir,
     publicPath: '/',
     filename: mode === 'production' ? 'js/dart-ui.[name].[chunkhash].js' : 'js/dart-ui.[name].[hash].js',
   },
@@ -24,6 +26,14 @@ module.exports = (env, { mode }) => ({
     new webpack.EnvironmentPlugin({
       LAYOUT_TYPE: 'mui',
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/assets/tst-favicon.png'),
+          to: publicDir,
+        },
+      ],
+    }),
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -35,7 +45,7 @@ module.exports = (env, { mode }) => ({
   module: {
     rules: [
       {
-        test: new RegExp('\\.js$'),
+        test: mode === 'production' ? { and: [/a/, /b/] } : new RegExp('\\.js$'),
         enforce: 'pre',
         use: ['scalajs-friendly-source-map-loader'],
       },

@@ -19,7 +19,13 @@ const styles = () => ({
     },
   },
   label: {
+    '& > p': {
+      transformOrigin: '0 50%',
+      transform: 'translateY(-50%) rotate(60deg)',
+      minWidth: '120px',
+    },
     overflowX: 'visible',
+    height: '110px',
   },
   parent: {
     position: 'relative',
